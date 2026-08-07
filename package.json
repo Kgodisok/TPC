@@ -1,0 +1,24 @@
+{
+  "name": "tpc",
+  "version": "1.0.0",
+  "description": "\"# TPC\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kgodisok/TPC.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Kgodisok/TPC/issues"
+  },
+  "homepage": "https://github.com/Kgodisok/TPC#readme",
+  "dependencies": {
+    "firebase": "^12.17.1"
+  }
+}
