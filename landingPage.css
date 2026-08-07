@@ -28,10 +28,19 @@ body.page-body {
 }
 
 .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-size: 1.25rem;
     font-weight: 700;
     letter-spacing: -0.02em;
     color: #1d2939;
+}
+
+.logo {
+    height: 40px;
+    width: auto;
+    display: block;
 }
 
 .nav-links {
