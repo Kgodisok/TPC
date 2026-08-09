@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="landingPage.css">
+    <title>Learner Portal Login</title>
+    <link rel="stylesheet" href="../styles/landingPage.css">
 </head>
 <body class="body">
     <header class="navbar">
         <div class="brand">
-            <img src="logo.png" alt="Logo" class="logo">
+            <img src="../images/logo.png" alt="Logo" class="logo">
             <span>Learner Portal</span>
         </div>
         <nav class="nav-links">
@@ -19,85 +19,73 @@
         </nav>
     </header>
 
-    <div class="developers">
+    <main>
+        <section class="developers">
             <h2>Developers</h2>
             <div class="developersNames">
-                <div id="developer">
+                <div class="developer">
                     <p>Kgodiso Matsepe</p>
                 </div>
-                <div id="developer">
-
-                <p>Karrel Esterhuizen</p>
+                <div class="developer">
+                    <p>Karrel Esterhuizen</p>
                 </div>
-            <div id="developer">
-                <p>Sibusiso Nhlapho</p>
-            </div>
-            </div>
-        </div>
-        
-
-    <h1>Welcome Back</h1>
-    <p>Sign in to continue your learning streak.</p>
-
-    <h2>Login</h2>
-    <form>
-        <label for="username">Email:</label>
-        <input 
-            type="email" 
-            id="email" 
-            name="email"
-            placeholder="Enter your email"
-        >
-
-        <br><br>
-
-        <label for="password">Password:</label>
-        <input 
-            type="password" 
-            id="password" 
-            name="password"
-            placeholder="Enter your password"
-        >
-
-        <br><br>
-
-                    <button type="Login">Login</button>
-                </form>
-                <p class="login-footer">New here? <a href="#signup">Create an account</a></p>
+                <div class="developer">
+                    <p>Sibusiso Nhlapho</p>
+                </div>
             </div>
         </section>
+
+        <section class="login-section">
+            <h1>Welcome Back</h1>
+            <p>Sign in to continue your learning streak.</p>
+
+            <h2>Login</h2>
+            <form action="#" method="post">
+                <label for="email">Email:</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email"
+                    placeholder="Enter your email"
+                    required
+                >
+
+                <br><br>
+
+                <label for="password">Password:</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                >
+
+                <br><br>
+
+                <button type="submit">Login</button>
+            </form>
+            <p class="login-footer">New here? <a href="#signup">Create an account</a></p>
+        </section>
+
+        <section class="support-portal">
+            <header>
+                <h1>Learner Support Portal</h1>
+                <nav>
+                    <a href="landingPage.html">Home</a>
+                </nav>
+            </header>
+
+            <h2>Welcome</h2>
+            <p>
+                This portal helps learners manage tasks, track progress,
+                and book support sessions.
+            </p>
+
+            <button id="welcomeBtn">Click Me</button>
+            <p id="message"></p>
+        </section>
     </main>
-    </div>
-
-    <div>
-        
-<header>
-    <h1>Learner Support Portal</h1>
-
-    <nav>
-        <a href="landingPage.html">Home</a>
-    </nav>
-</header>
-
-    <main>
-
-        <h2>Welcome</h2>
-
-        <p>
-            This portal helps learners manage tasks, track progress,
-            and book support sessions.
-        </p>
-
-        <button id="welcomeBtn">
-            Click Me
-        </button>
-
-        <p id="message"></p>
-
-    </main>
-
-
-    </div>
 </body>
 </html>
 
