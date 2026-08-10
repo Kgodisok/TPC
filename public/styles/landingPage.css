@@ -122,12 +122,39 @@ body.page-body {
 }
 
 .developer-list li {
-    padding: 12px 16px;
+    padding: 16px 18px;
     background: #f8fafc;
     border-radius: 14px;
     border: 1px solid rgba(148, 163, 184, 0.2);
     color: #0f172a;
-    font-weight: 600;
+}
+
+.developer-name {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.developer-email {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #475569;
+    text-decoration: none;
+}
+
+.developer-email::before {
+    content: "✉";
+    display: inline-block;
+    font-size: 0.9rem;
+    color: #2563eb;
+}
+
+.developer-email:hover {
+    color: #1d4ed8;
 }
 
 .hero-text p {
