@@ -83,7 +83,13 @@ body.page-body {
     gap: 48px;
     max-width: 1080px;
     width: 100%;
-    align-items: center;
+    align-items: start;
+}
+
+.hero-left {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
 }
 
 .hero-text h1 {
@@ -91,6 +97,37 @@ body.page-body {
     font-size: clamp(2.5rem, 5vw, 4rem);
     line-height: 1.02;
     color: #0f172a;
+}
+
+.dev-panel {
+    padding: 28px;
+    background: #ffffff;
+    border-radius: 24px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+}
+
+.dev-panel h2 {
+    margin: 0 0 16px;
+    font-size: 1.5rem;
+    color: #0f172a;
+}
+
+.developer-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.developer-list li {
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #0f172a;
+    font-weight: 600;
 }
 
 .hero-text p {
