@@ -265,6 +265,27 @@ body.page-body {
     }
 }
 
+.site-footer {
+    padding: 24px 32px;
+    background: rgba(15, 23, 42, 0.05);
+    text-align: center;
+    color: #475569;
+    border-top: 1px solid rgba(31, 42, 55, 0.08);
+}
+
+.site-footer .footer-content {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+.site-footer p {
+    margin: 0;
+}
+
 .developersNames {
     margin-top: 40px;
     text-align: center;
