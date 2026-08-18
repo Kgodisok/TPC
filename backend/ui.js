@@ -4,6 +4,9 @@ const password = document.getElementById("password");
 //const enrolBtn = document.getElementById("enrolBtn");
 const submitBtn = document.getElementById("loginBtn");
 
+const loginErrorMessage = document.getElementById("loginErrorMessage");
+
+
 
 const userNameAndPassword = [];
 
@@ -11,7 +14,7 @@ const login = (event) => {
     event.preventDefault();
 
     if (email.value.trim() === "" || password.value.trim() === ""){
-        alert("Please enter both email and password");
+        loginErrorMessage.textContent = "Please enter both email and password";
     } else {
         userNameAndPassword.push({
             email: email.value,
