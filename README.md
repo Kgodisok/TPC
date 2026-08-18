@@ -1,3 +1,7 @@
+
+Figma Design Project:
+https://www.figma.com/make/qGsRICJkncdDbpPOQC8vBm/Learner-Dashboard?t=IQ8KSbTfO6x7GYZc-1
+
 SkillsTrack Learner Support Portal
 
 About the Project
