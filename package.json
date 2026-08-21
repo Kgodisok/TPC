@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node backend/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test",
+    "lint": "eslint backend/models.js tests"
   },
   "repository": {
     "type": "git",
@@ -21,5 +22,9 @@
   "homepage": "https://github.com/Kgodisok/TPC#readme",
   "dependencies": {
     "firebase": "^12.17.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.9.0"
   }
 }

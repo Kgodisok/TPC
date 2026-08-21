@@ -742,3 +742,115 @@ The required technology and evidence are listed in the project brief.
 Project Reference
 
 This README is based on the supplied JavaScript Programmer – Two-Month Integrated Project brief for the SkillsTrack Learner Support Portal. The brief covers the application requirements, Firebase data structure, REST communication, JavaScript development, GitHub collaboration, testing and the two-month assessment deliverables.
+
+## Month 1 Deliverables Evidence
+
+### Problem Statement, Scope and Client Requirements
+
+Learners currently need to track learning tasks, support bookings and progress across separate tools. SquareSchools provides one learner portal for these activities.
+
+In scope: account registration and login, task CRUD operations, progress totals, support-session requests, resource access, task search/filter/sort, a saved display preference, deletion confirmation, a printable progress summary, Firebase Authentication, Firebase Realtime Database and REST communication.
+
+Out of scope: staff administration, payment processing, replacing an institution's learning-management system, and storing passwords outside Firebase Authentication.
+
+Client requirements are to provide a clear learner workflow, protect user data, use Firebase and REST, demonstrate JavaScript fundamentals and object-oriented design, and maintain evidence of collaboration, testing and review.
+
+### User Stories and Acceptance Criteria
+
+1. As a learner, I want to register and log in so that I can access my portal securely.
+    - Valid details create an account and redirect to the dashboard.
+    - Missing or invalid details show a clear validation message.
+    - A signed-out user cannot use protected dashboard features.
+2. As a learner, I want to create and view tasks so that I can organise my work.
+    - A task requires a title and valid input before it is saved.
+    - A saved task displays its title, category, due date, priority and status.
+    - Tasks are associated with the signed-in user's UID.
+3. As a learner, I want to edit and complete a task so that my task list stays current.
+    - Editing replaces the selected task's values without changing its owner.
+    - Completing a task changes its status to completed.
+    - The updated state remains after the task list is reloaded.
+4. As a learner, I want to delete a task safely so that I do not remove it accidentally.
+    - Selecting delete opens a confirmation dialog.
+    - Cancel leaves the task unchanged.
+    - Confirm removes the task and refreshes totals.
+5. As a learner, I want to see my progress so that I know how much work remains.
+    - Total, completed and outstanding counts are displayed.
+    - Progress is completed tasks divided by total tasks.
+    - An empty task list displays zero progress without an error.
+6. As a learner, I want to search, filter and sort tasks so that I can find work quickly.
+    - Search matches task titles or categories.
+    - Completed, outstanding and all-task filters work correctly.
+    - The selected sort order changes display order without changing stored data.
+
+### Programming Life-cycle Plan
+
+| Stage | Month 1 activity and evidence |
+| --- | --- |
+| Analysis | Identify learner problems, client requirements, scope and user stories. |
+| Design | Produce navigation, pseudocode, Firebase model, REST plan and class relationships. |
+| Coding | Build the HTML shell, CSS layout, JavaScript modules, authentication and task features. |
+| Testing | Run automated unit tests and manual acceptance checks for normal, invalid and boundary inputs. |
+| Implementation review | Demonstrate the current build, review issues with the team/assessor and record feedback. |
+| Improvement | Prioritise feedback, correct defects, retest and record changes in project history. |
+
+### Object Design and Relationships
+
+```text
+User 1 -------- owns -------- * Task
+User 1 -------- creates ----- * Booking
+```
+
+`User` represents the authenticated learner. `Task` represents one learner task. `Booking` represents a support request. A `User` can own many `Task` and `Booking` objects; every task and booking belongs to one user through `userId`.
+
+```javascript
+class User {
+     constructor(uid, displayName, email) {
+          this.uid = uid;
+          this.displayName = displayName;
+          this.email = email;
+          this.tasks = [];
+          this.bookings = [];
+     }
+}
+
+class Task {
+     constructor(title, dueDate, userId) {
+          this.title = title;
+          this.dueDate = dueDate;
+          this.userId = userId;
+          this.completed = false;
+     }
+
+     markComplete() {
+          this.completed = true;
+     }
+}
+```
+
+### IDE Configuration
+
+The repository contains VS Code settings in `.vscode/` for a consistent JavaScript formatter, ESLint validation and Node debugging. The CI workflow runs the same test command used locally.
+
+### Testing and Debugging Record
+
+| Issue | Correction | Retest evidence |
+| --- | --- | --- |
+| Empty login fields were accepted by the form handler. | Added trimmed-field validation and an error message. | Manual login check confirms the message is shown. |
+| The root URL did not select the login page. | Added the Express redirect from `/` to `/login.html`. | A running server request to `/` returns a redirect. |
+| Progress could divide by zero with no tasks. | Defined the empty-list result as zero counts and progress. | Automated progress tests cover empty and normal totals. |
+
+Update this record with dates, screenshots and tester names after each demonstration.
+
+### Assessor Review and Month 1 Reflection
+
+#### Assessor review record
+
+- Review date: To be completed during assessor review
+- Assessor: To be completed
+- Feedback: To be completed
+- Agreed actions: To be completed
+- Retest/review date: To be completed
+
+#### Month 1 reflection
+
+Each team member must record their contribution, learning, strongest requirement, remaining gap and Month 2 improvement actions. This section remains a template until the team and assessor provide those records.
