@@ -1,4 +1,4 @@
-const email = document.getElementById("email");
+/*const email = document.getElementById("email");
 const password = document.getElementById("password");
 //const welcomeBtn = document.getElementById("welcomeBtn");
 //const enrolBtn = document.getElementById("enrolBtn");
@@ -26,4 +26,4 @@ const login = (event) => {
 };
 
 submitBtn.addEventListener("click", login);
- 
+*/
