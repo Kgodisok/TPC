@@ -49,7 +49,7 @@ TPC/
     ├── login.html
     ├── images/
     └── styles/
-
+    
 The project may grow as more features are added. When new files are created, they should be placed where they make sense so that the project stays easy to understand and maintain.
 
 Main Features
@@ -151,172 +151,436 @@ END application
 
 START registerUser
 
-    GET name from the form
-    GET email from the form
-    GET password from the form
 
-    VALIDATE the name
-    VALIDATE the email
-    VALIDATE the password
+START registerUser
 
-    IF any input is invalid THEN
-        SHOW the validation error
+    GET name from the name input field
+    GET email from the email input field
+    GET password from the password input field
+
+    REMOVE unnecessary spaces from name
+    REMOVE unnecessary spaces from email
+
+    IF name is empty
+        DISPLAY "Name is required"
         STOP
     END IF
 
-    TRY
-        CREATE the Firebase Authentication account
-        GET the new user's UID
-        CREATE the user's profile in Firebase
-        SAVE name, email, role and created date
-        SHOW a success message
+    IF name contains numbers or special characters
+        DISPLAY "Name must contain letters only"
+        STOP
+    END IF
 
-    CATCH error
-        SHOW a registration error message
+    IF email is empty
+        DISPLAY "Email is required"
+        STOP
+    END IF
 
-    FINALLY
-        REMOVE the loading message
-    END TRY
+    IF email does not contain a valid email format
+        DISPLAY "Please enter a valid email address"
+        STOP
+    END IF
+
+    IF password is empty
+        DISPLAY "Password is required"
+        STOP
+    END IF
+
+    IF password is less than 8 characters
+        DISPLAY "Password must contain at least 8 characters"
+        STOP
+    END IF
+
+    IF password does not contain a number
+        DISPLAY "Password must contain at least one number"
+        STOP
+    END IF
+
+    IF password does not contain a special character
+        DISPLAY "Password must contain at least one special character"
+        STOP
+    END IF
+
+    CREATE a user object using name, email and password
+
+    ADD the user object to the users array
+
+    CLEAR the name input field
+    CLEAR the email input field
+    CLEAR the password input field
+
+    DISPLAY "Registration successful"
 
 END registerUser
+
+
 
 3. Log In
 
 START loginUser
 
-    GET email
-    GET password
+    GET the value from the email input field
+    GET the value from the password input field
 
-    IF email is empty OR password is empty THEN
-        SHOW "Please complete all required fields"
+    REMOVE unnecessary spaces from the beginning and end of the email
+
+    IF email is empty
+        DISPLAY "Email is required"
         STOP
     END IF
 
-    CHECK that the email format is valid
+    IF password is empty
+        DISPLAY "Password is required"
+        STOP
+    END IF
+
+    IF email does not match a valid email format
+        DISPLAY "Please enter a valid email address"
+        STOP
+    END IF
+
+    DISPLAY the loading state
 
     TRY
-        SEND the login request to Firebase Authentication
 
-        IF login is successful THEN
-            KEEP the authenticated user state
+        SEND the email and password to Firebase Authentication
+
+        IF Firebase Authentication confirms the email and password are correct
+            STORE the authenticated user's session/state
             REDIRECT the user to the dashboard
         ELSE
-            SHOW a login error
+            DISPLAY "Invalid email or password"
         END IF
 
-    CATCH error
-        SHOW a user-friendly error message
+    CATCH authentication error
+
+        IF the error means the email or password is incorrect
+            DISPLAY "Invalid email or password"
+        ELSE IF the error means too many login attempts
+            DISPLAY "Too many attempts. Please try again later"
+        ELSE
+            DISPLAY "Something went wrong. Please try again"
+        END IF
 
     FINALLY
+
         REMOVE the loading state
-    END TRY
 
 END loginUser
 
+
 4. Check Authentication State
 
+
+START checkAuthenticationState
+
+    GET the current authentication state from Firebase
+
+    IF a user is currently signed in THEN
+
+        GET the authenticated user's UID
+        GET the authenticated user's email
+
+        SET authentication status to "authenticated"
+
+        RETURN the authenticated user's information
+
+    ELSE
+
+        SET authentication status to "not authenticated"
+
+        RETURN no authenticated user
+
+    END IF
+
+END checkAuthenticationState
+
+
+5.
 START monitorAuthentication
 
-    LISTEN for changes in Firebase authentication
+    LISTEN for changes to the Firebase Authentication state
 
-    IF a user is signed in THEN
-        GET the user's UID
-        LOAD the user's profile
-        ALLOW access to protected features
-    ELSE
-        BLOCK protected features
-        SEND the user to the login page when necessary
-    END IF
+    WHEN the authentication state changes:
+
+        GET the currently authenticated user
+
+        IF a user is signed in THEN
+
+            GET the user's unique UID from Firebase Authentication
+
+            USE the UID to find the user's profile in the database
+
+            LOAD the user's name, email and other profile information
+
+            STORE the authenticated user's information in the application state
+
+            ALLOW the user to access protected pages and features
+
+            HIDE the login and registration options
+
+        ELSE
+
+            REMOVE the authenticated user's information from the application state
+
+            BLOCK access to protected pages and features
+
+            SHOW the login and registration options
+
+            IF the user attempts to access a protected page THEN
+                REDIRECT the user to the login page
+            END IF
+
+        END IF
 
 END monitorAuthentication
 
+
 5. Create a Task
+
 
 START createTask
 
-    GET task title
-    GET category
-    GET due date
-    GET priority
-    GET the current user's UID
+    GET the value from the task title input field
+    GET the selected category from the category input field
+    GET the selected due date from the due date input field
+    GET the selected priority from the priority input field
 
-    VALIDATE the required fields
+    GET the currently authenticated user's UID from Firebase Authentication
 
-    IF validation fails THEN
-        SHOW the validation error
+    IF task title is empty THEN
+        DISPLAY "Task title is required"
         STOP
     END IF
 
-    CREATE a task object
+    IF category is empty THEN
+        DISPLAY "Please select a category"
+        STOP
+    END IF
+
+    IF due date is empty THEN
+        DISPLAY "Due date is required"
+        STOP
+    END IF
+
+    IF priority is empty THEN
+        DISPLAY "Please select a priority"
+        STOP
+    END IF
+
+    IF no user is currently authenticated THEN
+        DISPLAY "Please log in before creating a task"
+        STOP
+    END IF
+
+    IF due date is earlier than the current date THEN
+        DISPLAY "Due date cannot be in the past"
+        STOP
+    END IF
+
+    CREATE a new task object
+
+    SET task.title = task title
+    SET task.category = selected category
+    SET task.dueDate = selected due date
+    SET task.priority = selected priority
     SET task.userId = current user's UID
     SET task.completed = false
     SET task.createdAt = current date and time
 
+    DISPLAY the loading state
+
     TRY
-        SEND the task to Firebase using POST
-        CLEAR the form
-        LOAD the tasks again
-        SHOW a success message
+
+        SEND the task object to Firebase
+
+        IF Firebase successfully saves the task THEN
+
+            CLEAR the task title input field
+            RESET the category selection
+            RESET the due date input field
+            RESET the priority selection
+
+            LOAD the user's tasks from Firebase
+
+            DISPLAY "Task created successfully"
+
+        ELSE
+
+            DISPLAY "Unable to create task"
+
+        END IF
 
     CATCH error
-        SHOW a task creation error
-    END TRY
+
+        DISPLAY "Something went wrong while creating the task. Please try again"
+
+    FINALLY
+
+        REMOVE the loading state
 
 END createTask
 
-6. Load Tasks
 
 START loadTasks
 
-    GET the current user's UID
-    SHOW a loading message
+    GET the currently authenticated user from Firebase Authentication
 
-    TRY
-        SEND a GET request to Firebase
-        RECEIVE the task data
-
-        KEEP only tasks belonging to the current user
-        SAVE the tasks in an array
-        DISPLAY the tasks on the page
-
-    CATCH error
-        SHOW an error message
-
-    FINALLY
-        REMOVE the loading message
-    END TRY
-
-END loadTasks
-
-7. Update a Task
-
-START updateTask
-
-    GET the selected task ID
-    GET the updated values
-    VALIDATE the values
-
-    IF the values are not valid THEN
-        SHOW the validation error
+    IF no user is currently authenticated THEN
+        DISPLAY "Please log in to view your tasks"
         STOP
     END IF
 
+    GET the authenticated user's UID
+
+    DISPLAY the task loading indicator
+
     TRY
-        SEND a PUT or PATCH request to Firebase
-        REFRESH the task list
-        SHOW a success message
+
+        SEND a request to Firebase to retrieve the tasks
+
+        RECEIVE the task data from Firebase
+
+        CREATE an empty tasks array
+
+        FOR EACH task received from Firebase
+
+            IF task.userId is equal to the current user's UID THEN
+                ADD the task to the tasks array
+            END IF
+
+        END FOR
+
+        SAVE the filtered tasks in the application's tasks array
+
+        CALL renderTasks with the tasks array
+
+        CALL calculateProgress using the tasks array
 
     CATCH error
-        SHOW an update error
-    END TRY
+
+        LOG the technical error for debugging
+        DISPLAY "Unable to load your tasks. Please try again"
+
+    FINALLY
+
+        REMOVE the task loading indicator
+
+END loadTasks
+
+
+START updateTask
+
+    GET the ID of the task selected by the user
+
+    FIND the selected task using its task ID
+
+    IF the selected task does not exist THEN
+        DISPLAY "Task could not be found"
+        STOP
+    END IF
+
+    GET the updated task title
+    GET the updated category
+    GET the updated due date
+    GET the updated priority
+    GET the updated completed status
+
+    REMOVE unnecessary spaces from the task title
+
+    IF task title is empty THEN
+        DISPLAY "Task title is required"
+        STOP
+    END IF
+
+    IF category is empty THEN
+        DISPLAY "Please select a category"
+        STOP
+    END IF
+
+    IF due date is empty THEN
+        DISPLAY "Due date is required"
+        STOP
+    END IF
+
+    IF priority is empty THEN
+        DISPLAY "Please select a priority"
+        STOP
+    END IF
+
+    IF no user is currently authenticated THEN
+        DISPLAY "Please log in before updating a task"
+        STOP
+    END IF
+
+    GET the current user's UID
+
+    IF selected task.userId is not equal to current user's UID THEN
+        DISPLAY "You are not allowed to update this task"
+        STOP
+    END IF
+
+    DISPLAY the loading state
+
+    TRY
+
+        CREATE an updated task object
+
+        SET updatedTask.title = updated task title
+        SET updatedTask.category = updated category
+        SET updatedTask.dueDate = updated due date
+        SET updatedTask.priority = updated priority
+        SET updatedTask.completed = updated completed status
+
+        SEND the updated task to Firebase using PUT or PATCH
+
+        IF Firebase successfully updates the task THEN
+
+            UPDATE the task in the local tasks array
+
+            CALL renderTasks with the updated tasks array
+
+            CALL calculateProgress using the updated tasks array
+
+            DISPLAY "Task updated successfully"
+
+        ELSE
+
+            DISPLAY "Unable to update the task"
+
+        END IF
+
+    CATCH error
+
+        LOG the technical error for debugging
+        DISPLAY "Something went wrong while updating the task"
+
+    FINALLY
+
+        REMOVE the loading state
 
 END updateTask
 
-8. Delete a Task
 
 START deleteTask
 
-    GET the selected task ID
+    GET the ID of the task selected by the user
+
+    FIND the selected task in the tasks array
+
+    IF the selected task does not exist THEN
+        DISPLAY "Task could not be found"
+        STOP
+    END IF
+
+    GET the currently authenticated user's UID
+
+    IF selected task.userId is not equal to current user's UID THEN
+        DISPLAY "You are not allowed to delete this task"
+        STOP
+    END IF
+
+    DISPLAY "Are you sure you want to delete this task?"
 
     ASK the user to confirm the deletion
 
@@ -324,271 +588,666 @@ START deleteTask
         STOP
     END IF
 
+    DISPLAY the loading state
+
     TRY
-        SEND a DELETE request to Firebase
-        REMOVE the task from the page
-        RECALCULATE progress
-        SHOW a success message
+
+        SEND a DELETE request to Firebase using the selected task ID
+
+        IF Firebase successfully deletes the task THEN
+
+            REMOVE the selected task from the local tasks array
+
+            CALL renderTasks with the updated tasks array
+
+            CALL calculateProgress using the updated tasks array
+
+            DISPLAY "Task deleted successfully"
+
+        ELSE
+
+            DISPLAY "Unable to delete the task"
+
+        END IF
 
     CATCH error
-        SHOW a deletion error
-    END TRY
+
+        LOG the technical error for debugging
+        DISPLAY "Something went wrong while deleting the task"
+
+    FINALLY
+
+        REMOVE the loading state
 
 END deleteTask
 
-9. Calculate Progress
+
 
 START calculateProgress
 
-    GET all tasks for the current user
+    GET the current user's UID
 
-    IF there are no tasks THEN
-        completed = 0
-        outstanding = 0
-        progress = 0
-        SHOW "No tasks available"
+    IF there is no authenticated user THEN
+        SET totalTasks = 0
+        SET completedTasks = 0
+        SET outstandingTasks = 0
+        SET progressPercentage = 0
         STOP
     END IF
 
-    COUNT how many tasks are completed
-    COUNT the total number of tasks
-    CALCULATE outstanding tasks
-    CALCULATE progress percentage
+    GET all tasks belonging to the current user
 
-    DISPLAY total tasks
-    DISPLAY completed tasks
-    DISPLAY outstanding tasks
-    DISPLAY progress percentage
+    COUNT the number of tasks
+    SET totalTasks to the total number of tasks
+
+    IF totalTasks is equal to 0 THEN
+
+        SET completedTasks = 0
+        SET outstandingTasks = 0
+        SET progressPercentage = 0
+
+        DISPLAY "No tasks available"
+
+        STOP
+
+    END IF
+
+    SET completedTasks = 0
+
+    FOR EACH task in the user's tasks
+
+        IF task.completed is equal to true THEN
+            INCREASE completedTasks by 1
+        END IF
+
+    END FOR
+
+    CALCULATE outstandingTasks as:
+
+        totalTasks minus completedTasks
+
+    CALCULATE progressPercentage as:
+
+        completedTasks divided by totalTasks multiplied by 100
+
+    DISPLAY totalTasks
+    DISPLAY completedTasks
+    DISPLAY outstandingTasks
+    DISPLAY progressPercentage
 
 END calculateProgress
 
-10. Search Tasks
+
 
 START searchTasks(searchTerm)
 
-    GET the tasks array
+    GET the current tasks array
 
-    FILTER the tasks
-    KEEP tasks where the title or category contains searchTerm
+    CONVERT searchTerm to lowercase
 
-    DISPLAY the matching tasks
+    REMOVE unnecessary spaces from searchTerm
+
+    IF searchTerm is empty THEN
+        CALL renderTasks with the complete tasks array
+        STOP
+    END IF
+
+    CREATE an empty matchingTasks array
+
+    FOR EACH task in the tasks array
+
+        CONVERT task.title to lowercase
+        CONVERT task.category to lowercase
+
+        IF task.title contains searchTerm
+            OR task.category contains searchTerm THEN
+
+            ADD the task to matchingTasks
+
+        END IF
+
+    END FOR
+
+    IF matchingTasks is empty THEN
+        DISPLAY "No tasks found"
+    ELSE
+        CALL renderTasks with matchingTasks
+    END IF
 
 END searchTasks
 
-11. Filter Tasks
+
 
 START filterTasks(status)
 
-    IF status = "completed" THEN
-        SHOW tasks where completed = true
+    GET the current tasks array
 
-    ELSE IF status = "outstanding" THEN
-        SHOW tasks where completed = false
+    IF status is equal to "completed" THEN
+
+        CREATE a filteredTasks array
+
+        KEEP only tasks where task.completed is true
+
+    ELSE IF status is equal to "outstanding" THEN
+
+        CREATE a filteredTasks array
+
+        KEEP only tasks where task.completed is false
+
+    ELSE IF status is equal to "all" THEN
+
+        SET filteredTasks equal to the complete tasks array
 
     ELSE
-        SHOW all tasks
+
+        DISPLAY "Invalid filter selected"
+        STOP
+
     END IF
+
+    CALL renderTasks with filteredTasks
 
 END filterTasks
 
-12. Sort Tasks
 
 START sortTasks
 
-    GET the selected sort option
+    GET the selected sorting option
 
-    SORT the tasks by the selected field
-    EXAMPLES: title, dueDate or priority
+    GET the current tasks array
 
-    DISPLAY the sorted tasks
+    IF sorting option is "title" THEN
+
+        SORT tasks alphabetically by task.title
+
+    ELSE IF sorting option is "dueDate" THEN
+
+        SORT tasks from earliest due date to latest due date
+
+    ELSE IF sorting option is "priority" THEN
+
+        SORT tasks according to priority
+
+        ORDER priority as:
+            High
+            Medium
+            Low
+
+    ELSE
+
+        DISPLAY "Invalid sorting option"
+        STOP
+
+    END IF
+
+    CALL renderTasks with the sorted tasks
 
 END sortTasks
 
-13. Display Tasks on the Page
 
 START renderTasks(tasks)
 
-    CLEAR the current task list
+    SELECT the task list container from the webpage
 
-    FOR EACH task
+    CLEAR all existing task elements from the task list
+
+    IF tasks array is empty THEN
+        DISPLAY "No tasks found"
+        STOP
+    END IF
+
+    FOR EACH task in the tasks array
+
         CREATE a task container
-        CREATE the title element
-        CREATE the status element
-        CREATE the edit button
-        CREATE the complete button
-        CREATE the delete button
 
-        PUT the task information into the elements
-        ADD the task container to the page
+        CREATE a title element
+        SET the title element text to task.title
+
+        CREATE a category element
+        SET the category element text to task.category
+
+        CREATE a due date element
+        SET the due date element text to task.dueDate
+
+        CREATE a priority element
+        SET the priority element text to task.priority
+
+        CREATE a status element
+
+        IF task.completed is true THEN
+            SET status text to "Completed"
+        ELSE
+            SET status text to "Outstanding"
+        END IF
+
+        CREATE an edit button
+        CREATE a complete button
+        CREATE a delete button
+
+        ATTACH the selected task ID to the buttons
+
+        ADD a click event to the edit button
+        CALL updateTask when the edit button is clicked
+
+        ADD a click event to the complete button
+        TOGGLE the task's completed status when clicked
+
+        ADD a click event to the delete button
+        CALL deleteTask when the delete button is clicked
+
+        ADD the title, category, due date, priority and status
+        TO the task container
+
+        ADD the edit, complete and delete buttons
+        to the task container
+
+        ADD the completed task container to the task list
+
     END FOR
 
 END renderTasks
 
-14. Book a Support Session
 
 START bookSupportSession
 
-    GET topic
-    GET preferred date
-    GET notes
-    GET current user's UID
+    GET the value from the support topic input field
+    GET the selected preferred date
+    GET the notes from the notes input field
 
-    VALIDATE required fields
+    GET the currently authenticated user
 
-    IF validation fails THEN
-        SHOW validation errors
+    IF no user is currently authenticated THEN
+        DISPLAY "Please log in before booking a support session"
+        STOP
+    END IF
+
+    GET the authenticated user's UID
+
+    REMOVE unnecessary spaces from the topic
+    REMOVE unnecessary spaces from the notes
+
+    IF topic is empty THEN
+        DISPLAY "Support topic is required"
+        STOP
+    END IF
+
+    IF preferred date is empty THEN
+        DISPLAY "Please select a preferred date"
+        STOP
+    END IF
+
+    IF preferred date is earlier than the current date THEN
+        DISPLAY "Please select a future date"
         STOP
     END IF
 
     CREATE a booking object
+
     SET booking.userId = current user's UID
+    SET booking.topic = topic
+    SET booking.preferredDate = preferred date
+    SET booking.notes = notes
     SET booking.status = "pending"
+    SET booking.createdAt = current date and time
+
+    DISPLAY the booking loading state
 
     TRY
-        SAVE the booking in Firebase
-        CLEAR the booking form
-        SHOW a success message
+
+        SAVE the booking object in Firebase
+
+        IF Firebase successfully saves the booking THEN
+
+            CLEAR the topic input
+            CLEAR the preferred date input
+            CLEAR the notes input
+
+            DISPLAY "Support session booked successfully"
+
+        ELSE
+
+            DISPLAY "Unable to book the support session"
+
+        END IF
 
     CATCH error
-        SHOW a booking error message
-    END TRY
+
+        LOG the technical error for debugging
+        DISPLAY "Something went wrong while booking your session"
+
+    FINALLY
+
+        REMOVE the booking loading state
 
 END bookSupportSession
 
-15. Save and Load a Cookie Preference
 
 START savePreference
 
-    GET the selected theme or display mode
-    SAVE the preference in a cookie
-    SET an expiry time and path
+    GET the theme selected by the user
+
+    IF selected theme is "dark" THEN
+        SET preference = "dark"
+    ELSE IF selected theme is "light" THEN
+        SET preference = "light"
+    ELSE
+        SET preference = "light"
+    END IF
+
+    CREATE a cookie named "theme"
+
+    SET the cookie value to the selected preference
+
+    SET the cookie expiry time
+
+    SET the cookie path to "/"
 
 END savePreference
 
 START loadPreference
 
-    READ the available cookies
+    READ the cookies stored by the browser
 
-    IF a saved preference exists THEN
-        APPLY it to the page
+    SEARCH for a cookie named "theme"
+
+    IF the "theme" cookie exists THEN
+
+        GET the saved theme value
+
+        IF saved theme is "dark" THEN
+            APPLY dark theme to the webpage
+
+        ELSE IF saved theme is "light" THEN
+            APPLY light theme to the webpage
+
+        END IF
+
     ELSE
-        USE the default preference
+
+        SET the theme to the default theme
+
     END IF
 
 END loadPreference
 
-16. Print Progress Summary
 
 START printProgressSummary
 
-    CALCULATE the latest progress values
-    PREPARE the summary for printing
+    GET the current user's tasks
+
+    COUNT the total number of tasks
+
+    COUNT the number of completed tasks
+
+    CALCULATE outstanding tasks
+
+    IF total tasks is greater than 0 THEN
+        CALCULATE progress percentage
+    ELSE
+        SET progress percentage to 0
+    END IF
+
+    CREATE a progress summary containing:
+
+        Total tasks
+        Completed tasks
+        Outstanding tasks
+        Progress percentage
+
+    DISPLAY the progress summary in the print section
+
     OPEN the browser print dialog
 
 END printProgressSummary
 
-17. JavaScript Animation
 
 START animateElement
 
-    SELECT the element to animate
-    SET the starting position or state
+    SELECT the HTML element that needs to be animated
 
-    REPEAT the animation update at a controlled interval
-        CHANGE the position, size or visible state
-    UNTIL the animation is finished
+    SET the element's starting position
 
-    STOP the timer
+    SET the element's starting size or opacity
+
+    SET the animation duration
+
+    SET the animation start time
+
+    START a repeated animation update
+
+    WHILE the animation duration has not finished
+
+        CALCULATE how much time has passed
+
+        CALCULATE the current animation progress
+
+        UPDATE the element's position, size or opacity
+
+        REQUEST the next animation frame
+
+    END WHILE
+
+    SET the element to its final position or state
+
+    STOP the animation
 
 END animateElement
 
-18. Multimedia Controls
 
 START multimediaControl
 
     SELECT the audio or video element
 
-    WHEN the user clicks PLAY
-        START the media
+    SELECT the PLAY button
+
+    SELECT the PAUSE button
+
+    WHEN the user clicks the PLAY button
+
+        CHECK whether the media is currently paused
+
+        IF the media is paused THEN
+            START playing the media
+        END IF
+
     END WHEN
 
-    WHEN the user clicks PAUSE
-        PAUSE the media
+    WHEN the user clicks the PAUSE button
+
+        CHECK whether the media is currently playing
+
+        IF the media is playing THEN
+            PAUSE the media
+        END IF
+
     END WHEN
 
 END multimediaControl
 
-19. Mini-game
 
 START game
 
-    INITIALISE the approved JavaScript game library/framework
-    CREATE the game area
-    SET the score to 0
-    SET the game state
+    INITIALISE the approved JavaScript game library
 
-    WHILE the game is running
-        READ user input
-        UPDATE game objects
-        CHECK game conditions
-        UPDATE the score
-        DISPLAY the updated game state
+    CREATE the game container
+
+    SET the initial score to 0
+
+    SET the game state to "running"
+
+    CREATE the required game objects
+
+    WHILE game state is "running"
+
+        READ keyboard, mouse or touch input from the player
+
+        UPDATE the position of the player's game object
+
+        UPDATE the position of other game objects
+
+        CHECK whether the player has collided with another object
+
+        CHECK whether the player has completed the required objective
+
+        IF the player earns points THEN
+            INCREASE the score
+        END IF
+
+        IF the player loses or completes the game THEN
+            SET game state to "finished"
+        END IF
+
+        UPDATE the game display
+
     END WHILE
 
-    SHOW the final score
+    DISPLAY "Game Over"
 
-    TRY
-        SAVE the score and game information to Firebase
-    CATCH error
-        SHOW a warning that the score could not be saved
-    END TRY
+    DISPLAY the player's final score
+
+    GET the current user's UID
+
+    IF a user is authenticated THEN
+
+        CREATE a score object
+
+        SET score.userId = current user's UID
+        SET score.score = final score
+        SET score.createdAt = current date and time
+
+        TRY
+
+            SAVE the score object to Firebase
+
+        CATCH error
+
+            LOG the technical error
+            DISPLAY "Your score could not be saved"
+
+        END TRY
+
+    END IF
 
 END game
 
-20. Error Handling
 
 START operation
 
+    DISPLAY the loading state
+
     TRY
-        VALIDATE the input
+
+        VALIDATE all required user input
 
         IF required information is missing THEN
-            THROW a custom error
+            CREATE a validation error
+            THROW the validation error
         END IF
 
-        SEND the request
-        PROCESS the response
+        SEND the request to the required service
+
+        RECEIVE the response
+
+        IF the response indicates failure THEN
+            THROW an operation error
+        END IF
+
+        PROCESS the successful response
 
     CATCH error
-        LOG the technical error for debugging
-        SHOW a clear message to the user
+
+        LOG the technical error details for debugging
+
+        IF the error is caused by invalid user input THEN
+            DISPLAY the specific validation message
+
+        ELSE IF the error is caused by authentication THEN
+            DISPLAY "Please log in and try again"
+
+        ELSE IF the error is caused by the server or Firebase THEN
+            DISPLAY "The service is currently unavailable. Please try again later"
+
+        ELSE
+            DISPLAY "Something went wrong. Please try again"
+
+        END IF
 
     FINALLY
+
         REMOVE the loading state
-        MAKE SURE the interface can still be used
+
+        ENABLE the required buttons and inputs
+
+        MAKE SURE the user interface is usable again
+
     END TRY
 
 END operation
 
-21. Task Class (Object-Oriented Design)
 
-CLASS Task
+START CLASS Task
 
-    PROPERTY title
-    PROPERTY dueDate
-    PROPERTY completed
+    DEFINE PROPERTY id
+    DEFINE PROPERTY title
+    DEFINE PROPERTY category
+    DEFINE PROPERTY dueDate
+    DEFINE PROPERTY priority
+    DEFINE PROPERTY userId
+    DEFINE PROPERTY completed
+    DEFINE PROPERTY createdAt
 
-    CONSTRUCTOR(title, dueDate)
+    CONSTRUCTOR(id, title, category, dueDate, priority, userId)
+
+        SET this.id = id
         SET this.title = title
+        SET this.category = category
         SET this.dueDate = dueDate
+        SET this.priority = priority
+        SET this.userId = userId
+
         SET this.completed = false
+
+        SET this.createdAt = current date and time
+
     END CONSTRUCTOR
 
+
     METHOD markComplete
+
         SET this.completed = true
+
+    END METHOD
+
+
+    METHOD markIncomplete
+
+        SET this.completed = false
+
+    END METHOD
+
+
+    METHOD toggleComplete
+
+        IF this.completed is true THEN
+            SET this.completed = false
+        ELSE
+            SET this.completed = true
+        END IF
+
+    END METHOD
+
+
+    METHOD updateTask(title, category, dueDate, priority)
+
+        SET this.title = title
+        SET this.category = category
+        SET this.dueDate = dueDate
+        SET this.priority = priority
+
     END METHOD
 
 END CLASS
+
 
 Example:
 
