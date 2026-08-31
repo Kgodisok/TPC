@@ -1,0 +1,13 @@
+SkillsTrack/
+│
+├── index.html
+├── signin.html
+├── create-account.html
+├── dashboard.html
+├── task-manager.html
+│
+├── css/
+│   └── style.css
+│
+└── js/
+    └── app.js

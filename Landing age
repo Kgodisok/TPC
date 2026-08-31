@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillsTrack - Home</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="logo">SkillsTrack</div>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="#features">Features</a>
+        <a href="#about">About</a>
+        <a href="signin.html">Sign In</a>
+        <a href="create-account.html" class="nav-button">Create Account</a>
+    </nav>
+</header>
+
+<main>
+
+    <section class="hero">
+
+        <div class="hero-content">
+            <h1>Welcome to SkillsTrack</h1>
+
+            <p>
+                Manage your learning tasks, track your progress,
+                request support and improve your programming skills
+                in one place.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="signin.html" class="primary-button">Sign In</a>
+                <a href="create-account.html" class="secondary-button">
+                    Create Account
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-card">
+            <h2>Learner Dashboard</h2>
+
+            <div class="mini-stat">
+                <span>Completed Tasks</span>
+                <strong>12</strong>
+            </div>
+
+            <div class="mini-stat">
+                <span>Outstanding Tasks</span>
+                <strong>5</strong>
+            </div>
+
+            <div class="mini-stat">
+                <span>Progress</span>
+                <strong>71%</strong>
+            </div>
+        </div>
+
+    </section>
+
+    <section id="features" class="features">
+
+        <h2>What SkillsTrack Offers</h2>
+
+        <div class="feature-grid">
+
+            <div class="feature-card">
+                <h3>Task Management</h3>
+                <p>
+                    Create, view, update and delete learning tasks.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Progress Tracking</h3>
+                <p>
+                    Monitor completed, outstanding and overall progress.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Support</h3>
+                <p>
+                    Book support sessions and receive status feedback.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Programming Game</h3>
+                <p>
+                    Reinforce basic programming concepts through an
+                    interactive mini-game.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>&copy; 2026 SkillsTrack. All rights reserved.</p>
+</footer>
+
+<script src="js/app.js"></script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillsTrack - Home</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="logo">SkillsTrack</div>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="#features">Features</a>
+        <a href="#about">About</a>
+        <a href="signin.html">Sign In</a>
+        <a href="create-account.html" class="nav-button">Create Account</a>
+    </nav>
+</header>
+
+<main>
+
+    <section class="hero">
+
+        <div class="hero-content">
+            <h1>Welcome to SkillsTrack</h1>
+
+            <p>
+                Manage your learning tasks, track your progress,
+                request support and improve your programming skills
+                in one place.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="signin.html" class="primary-button">Sign In</a>
+                <a href="create-account.html" class="secondary-button">
+                    Create Account
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-card">
+            <h2>Learner Dashboard</h2>
+
+            <div class="mini-stat">
+                <span>Completed Tasks</span>
+                <strong>12</strong>
+            </div>
+
+            <div class="mini-stat">
+                <span>Outstanding Tasks</span>
+                <strong>5</strong>
+            </div>
+
+            <div class="mini-stat">
+                <span>Progress</span>
+                <strong>71%</strong>
+            </div>
+        </div>
+
+    </section>
+
+    <section id="features" class="features">
+
+        <h2>What SkillsTrack Offers</h2>
+
+        <div class="feature-grid">
+
+            <div class="feature-card">
+                <h3>Task Management</h3>
+                <p>
+                    Create, view, update and delete learning tasks.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Progress Tracking</h3>
+                <p>
+                    Monitor completed, outstanding and overall progress.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Support</h3>
+                <p>
+                    Book support sessions and receive status feedback.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Programming Game</h3>
+                <p>
+                    Reinforce basic programming concepts through an
+                    interactive mini-game.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>&copy; 2026 SkillsTrack. All rights reserved.</p>
+</footer>
+
+<script src="js/app.js"></script>
+
+</body>
+</html>

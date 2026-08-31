@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>
+        SkillsTrack - Facilitator Dashboard
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css">
+
+</head>
+
+
+<body>
+
+
+<!-- =========================
+     HEADER
+========================= -->
+
+<header class="dashboard-header">
+
+    <div class="logo">
+        SkillsTrack
+    </div>
+
+
+    <div class="welcome">
+
+        <span>
+            Facilitator Dashboard
+        </span>
+
+    </div>
+
+
+    <div class="auth-buttons">
+
+        <a
+            href="dashboard.html"
+            class="secondary-button">
+
+            Learner Dashboard
+
+        </a>
+
+
+        <button
+            id="facilitatorSignOutBtn"
+            class="danger-button">
+
+            Sign Out
+
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- =========================
+     DASHBOARD LAYOUT
+========================= -->
+
+<div class="facilitator-layout">
+
+
+    <!-- =========================
+         LEFT SIDEBAR
+    ========================== -->
+
+    <aside class="facilitator-sidebar">
+
+        <h2>
+            Facilitator
+        </h2>
+
+
+        <nav class="facilitator-nav">
+
+            <a href="#overview">
+                Dashboard
+            </a>
+
+            <a href="#learners">
+                Learners
+            </a>
+
+            <a href="#tasks">
+                Tasks
+            </a>
+
+            <a href="#progress">
+                Progress
+            </a>
+
+            <a href="#support">
+                Support
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="facilitator-main">
+
+
+        <!-- OVERVIEW -->
+
+        <section
+            id="overview"
+            class="facilitator-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h1>
+                        Facilitator Dashboard
+                    </h1>
+
+                    <p>
+                        Monitor learners, tasks,
+                        progress and support requests.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATISTICS -->
+
+            <div class="facilitator-stats">
+
+
+                <div class="facilitator-stat-card">
+
+                    <span>
+                        Total Learners
+                    </span>
+
+                    <strong id="facilitatorLearners">
+                        25
+                    </strong>
+
+                </div>
+
+
+                <div class="facilitator-stat-card">
+
+                    <span>
+                        Total Tasks
+                    </span>
+
+                    <strong id="facilitatorTasks">
+                        80
+                    </strong>
+
+                </div>
+
+
+                <div class="facilitator-stat-card">
+
+                    <span>
+                        Completed Tasks
+                    </span>
+
+                    <strong id="facilitatorCompleted">
+                        60
+                    </strong>
+
+                </div>
+
+
+                <div class="facilitator-stat-card">
+
+                    <span>
+                        Outstanding Tasks
+                    </span>
+
+                    <strong id="facilitatorOutstanding">
+                        20
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             LEARNERS
+        ========================== -->
+
+        <section
+            id="learners"
+            class="facilitator-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        Learners
+                    </h2>
+
+                    <p>
+                        View and manage registered learners.
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="addLearnerBtn"
+                    class="primary-button">
+
+                    Add Learner
+
+                </button>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Name
+                            </th>
+
+                            <th>
+                                Email
+                            </th>
+
+                            <th>
+                                Tasks
+                            </th>
+
+                            <th>
+                                Progress
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="learnerTable">
+
+                        <tr>
+
+                            <td>
+                                Sibusiso
+                            </td>
+
+                            <td>
+                                learner@example.com
+                            </td>
+
+                            <td>
+                                15
+                            </td>
+
+                            <td>
+                                80%
+                            </td>
+
+                            <td>
+
+                                <button
+                                    class="table-button">
+
+                                    View
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Learner 2
+                            </td>
+
+                            <td>
+                                learner2@example.com
+                            </td>
+
+                            <td>
+                                12
+                            </td>
+
+                            <td>
+                                65%
+                            </td>
+
+                            <td>
+
+                                <button
+                                    class="table-button">
+
+                                    View
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Learner 3
+                            </td>
+
+                            <td>
+                                learner3@example.com
+                            </td>
+
+                            <td>
+                                18
+                            </td>
+
+                            <td>
+                                90%
+                            </td>
+
+                            <td>
+
+                                <button
+                                    class="table-button">
+
+                                    View
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             TASKS
+        ========================== -->
+
+        <section
+            id="tasks"
+            class="facilitator-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        Task Management
+                    </h2>
+
+                    <p>
+                        Monitor and manage learner tasks.
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="createFacilitatorTaskBtn"
+                    class="primary-button">
+
+                    Create Task
+
+                </button>
+
+            </div>
+
+
+            <div class="facilitator-task-grid">
+
+
+                <div class="facilitator-task-card">
+
+                    <h3>
+                        Assigned Tasks
+                    </h3>
+
+                    <strong>
+                        80
+                    </strong>
+
+                    <p>
+                        Tasks assigned to learners.
+                    </p>
+
+                </div>
+
+
+                <div class="facilitator-task-card">
+
+                    <h3>
+                        Completed
+                    </h3>
+
+                    <strong>
+                        60
+                    </strong>
+
+                    <p>
+                        Tasks completed by learners.
+                    </p>
+
+                </div>
+
+
+                <div class="facilitator-task-card">
+
+                    <h3>
+                        Outstanding
+                    </h3>
+
+                    <strong>
+                        20
+                    </strong>
+
+                    <p>
+                        Tasks still requiring attention.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             PROGRESS
+        ========================== -->
+
+        <section
+            id="progress"
+            class="facilitator-section">
+
+            <h2>
+                Learner Progress
+            </h2>
+
+            <p>
+                Monitor learner performance.
+            </p>
+
+
+            <div class="progress-list">
+
+
+                <div class="learner-progress">
+
+                    <div class="progress-info">
+
+                        <span>
+                            Sibusiso
+                        </span>
+
+                        <strong>
+                            80%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="progress-bar">
+
+                        <div
+                            class="progress-fill"
+                            style="width: 80%;">
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="learner-progress">
+
+                    <div class="progress-info">
+
+                        <span>
+                            Learner 2
+                        </span>
+
+                        <strong>
+                            65%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="progress-bar">
+
+                        <div
+                            class="progress-fill"
+                            style="width: 65%;">
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="learner-progress">
+
+                    <div class="progress-info">
+
+                        <span>
+                            Learner 3
+                        </span>
+
+                        <strong>
+                            90%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="progress-bar">
+
+                        <div
+                            class="progress-fill"
+                            style="width: 90%;">
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             SUPPORT
+        ========================== -->
+
+        <section
+            id="support"
+            class="facilitator-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        Support Requests
+                    </h2>
+
+                    <p>
+                        Review learner support requests.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="support-request">
+
+
+                <div>
+
+                    <h3>
+                        Sibusiso
+                    </h3>
+
+                    <p>
+                        Request for assistance with
+                        programming task.
+                    </p>
+
+                    <small>
+                        Status: Pending
+                    </small>
+
+                </div>
+
+
+                <div class="support-actions">
+
+                    <button
+                        class="approve-button">
+
+                        Approve
+
+                    </button>
+
+
+                    <button
+                        class="reject-button">
+
+                        Reject
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="support-request">
+
+
+                <div>
+
+                    <h3>
+                        Learner 2
+                    </h3>
+
+                    <p>
+                        Request for learning support.
+                    </p>
+
+                    <small>
+                        Status: Pending
+                    </small>
+
+                </div>
+
+
+                <div class="support-actions">
+
+                    <button
+                        class="approve-button">
+
+                        Approve
+
+                    </button>
+
+
+                    <button
+                        class="reject-button">
+
+                        Reject
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script src="js/app.js"></script>
+
+</body>
+
+</html>

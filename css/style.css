@@ -1,0 +1,704 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f7fb;
+    color: #172b4d;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+.navbar {
+    height: 70px;
+    background: #062b5c;
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 6%;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.navbar nav {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.navbar nav a {
+    color: white;
+    font-weight: 500;
+}
+
+.nav-button {
+    background: #42a5f5;
+    padding: 10px 18px;
+    border-radius: 6px;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.primary-button,
+.secondary-button,
+.danger-button,
+.sidebar-button {
+    display: inline-block;
+
+    border: none;
+    border-radius: 6px;
+
+    padding: 11px 20px;
+
+    cursor: pointer;
+
+    font-size: 15px;
+    font-weight: bold;
+
+    text-align: center;
+}
+
+.primary-button {
+    background: #42a5f5;
+    color: white;
+}
+
+.secondary-button {
+    background: #dbeeff;
+    color: #062b5c;
+}
+
+.danger-button {
+    background: #dc3545;
+    color: white;
+}
+
+.full-width {
+    width: 100%;
+}
+
+
+/* =========================
+   LANDING PAGE
+========================= */
+
+.hero {
+    min-height: 600px;
+
+    background: #062b5c;
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 80px 10%;
+
+    gap: 60px;
+}
+
+.hero-content {
+    max-width: 600px;
+}
+
+.hero h1 {
+    font-size: 52px;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 19px;
+    line-height: 1.7;
+    margin-bottom: 30px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.hero-card {
+    background: white;
+    color: #172b4d;
+
+    width: 350px;
+
+    padding: 30px;
+
+    border-radius: 12px;
+
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+}
+
+.hero-card h2 {
+    margin-bottom: 20px;
+}
+
+.mini-stat {
+    display: flex;
+    justify-content: space-between;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid #ddd;
+}
+
+.features {
+    padding: 70px 10%;
+    text-align: center;
+}
+
+.features h2 {
+    margin-bottom: 40px;
+}
+
+.feature-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 25px;
+}
+
+.feature-card {
+    background: white;
+
+    padding: 30px;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.feature-card h3 {
+    margin-bottom: 15px;
+}
+
+footer {
+    background: #062b5c;
+    color: white;
+
+    text-align: center;
+
+    padding: 20px;
+}
+
+
+/* =========================
+   AUTHENTICATION
+========================= */
+
+.auth-page {
+    background: #eef5fb;
+}
+
+.auth-container {
+    min-height: calc(100vh - 70px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px;
+}
+
+.auth-card {
+    width: 430px;
+
+    background: white;
+
+    padding: 40px;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.auth-card h1 {
+    margin-bottom: 10px;
+}
+
+.form-description {
+    margin-bottom: 25px;
+    color: #666;
+}
+
+.auth-card label {
+    display: block;
+
+    margin-top: 15px;
+    margin-bottom: 7px;
+
+    font-weight: bold;
+}
+
+.auth-card input,
+.auth-card textarea,
+.auth-card select {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    font-size: 15px;
+}
+
+.auth-card button {
+    margin-top: 25px;
+}
+
+.form-message {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 25px;
+}
+
+.auth-link a {
+    color: #147dcc;
+    font-weight: bold;
+}
+
+
+/* =========================
+   DASHBOARD HEADER
+========================= */
+
+.dashboard-header {
+    height: 70px;
+
+    background: #062b5c;
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 25px;
+}
+
+
+/* =========================
+   DASHBOARD LAYOUT
+========================= */
+
+.dashboard-layout {
+    min-height: calc(100vh - 70px);
+
+    display: grid;
+
+    grid-template-columns:
+        220px 1fr 280px;
+}
+
+
+/* LEFT SIDEBAR */
+
+.sidebar {
+    background: #0b3b75;
+
+    color: white;
+
+    padding: 25px;
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+}
+
+.progress-box {
+    background: #164d8d;
+
+    padding: 15px;
+
+    border-radius: 7px;
+
+    margin-bottom: 12px;
+}
+
+.progress-box span {
+    display: block;
+
+    font-size: 13px;
+
+    margin-bottom: 5px;
+}
+
+.progress-box strong {
+    font-size: 22px;
+}
+
+.sidebar-button {
+    width: 100%;
+
+    margin-top: 15px;
+
+    background: #42a5f5;
+
+    color: white;
+}
+
+
+/* MAIN DASHBOARD */
+
+.dashboard-main {
+    padding: 35px;
+}
+
+.dashboard-title {
+    margin-bottom: 30px;
+}
+
+.dashboard-title h1 {
+    margin-bottom: 10px;
+}
+
+.dashboard-cards {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 20px;
+}
+
+.dashboard-card {
+    background: white;
+
+    padding: 25px;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-card h3 {
+    margin-bottom: 15px;
+}
+
+.dashboard-card p {
+    margin-bottom: 20px;
+}
+
+.dashboard-card input {
+    width: 100%;
+
+    padding: 10px;
+
+    margin-bottom: 10px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 5px;
+}
+
+
+/* RIGHT SIDEBAR */
+
+.support-sidebar {
+    background: white;
+
+    padding: 25px;
+
+    border-left: 1px solid #ddd;
+}
+
+.support-sidebar h2 {
+    margin-bottom: 20px;
+}
+
+.support-sidebar label {
+    display: block;
+
+    margin-top: 15px;
+    margin-bottom: 7px;
+
+    font-weight: bold;
+}
+
+.support-sidebar input,
+.support-sidebar textarea {
+
+    width: 100%;
+
+    padding: 10px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 5px;
+}
+
+.support-sidebar textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.support-sidebar button {
+    margin-top: 20px;
+}
+
+
+/* =========================
+   TASK MANAGER
+========================= */
+
+.task-page {
+    padding: 40px 7%;
+}
+
+.task-header {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 30px;
+}
+
+.task-form-card,
+.task-list-card {
+    background: white;
+
+    padding: 30px;
+
+    border-radius: 10px;
+
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.task-form-card {
+    max-width: 650px;
+}
+
+.task-form-card label {
+    display: block;
+
+    margin-top: 15px;
+    margin-bottom: 7px;
+
+    font-weight: bold;
+}
+
+.task-form-card input,
+.task-form-card textarea,
+.task-form-card select {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+}
+
+.task-form-card textarea {
+    min-height: 100px;
+}
+
+.task-form-card button {
+    margin-top: 20px;
+}
+
+.task-list-header {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+.task-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.task-controls input,
+.task-controls select {
+    padding: 10px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 5px;
+}
+
+.task-item {
+    border: 1px solid #ddd;
+
+    padding: 20px;
+
+    border-radius: 8px;
+
+    margin-bottom: 12px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+.task-item h3 {
+    margin-bottom: 8px;
+}
+
+.task-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.task-actions button {
+    padding: 8px 12px;
+
+    border: none;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+}
+
+.complete {
+    background: #28a745;
+    color: white;
+}
+
+.edit {
+    background: #ffc107;
+}
+
+.delete {
+    background: #dc3545;
+    color: white;
+}
+
+
+/* =========================
+   RESPONSIVE DESIGN
+========================= */
+
+@media (max-width: 1000px) {
+
+    .dashboard-layout {
+        grid-template-columns: 180px 1fr;
+    }
+
+    .support-sidebar {
+        display: none;
+    }
+
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .feature-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .navbar {
+        height: auto;
+
+        padding: 20px;
+
+        flex-direction: column;
+
+        gap: 15px;
+    }
+
+    .navbar nav {
+        flex-wrap: wrap;
+
+        justify-content: center;
+    }
+
+    .hero {
+        flex-direction: column;
+
+        padding: 50px 25px;
+
+        text-align: center;
+    }
+
+    .hero h1 {
+        font-size: 38px;
+    }
+
+    .hero-card {
+        width: 100%;
+    }
+
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-layout {
+        display: block;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .task-header,
+    .task-list-header {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+    .task-controls {
+        width: 100%;
+
+        flex-direction: column;
+    }
+
+    .task-item {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+}
