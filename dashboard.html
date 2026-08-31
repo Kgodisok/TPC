@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>SquareSchools | Learner Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="styles/landingPage.css"
+    >
+</head>
+
+
+<body class="dashboard-body">
+
+    <!-- ================================
+         TOP BAR
+    ================================= -->
+
+    <header class="dashboard-header">
+
+        <div class="brand">
+
+            <img
+                src="images/logo.svg"
+                alt="SquareSchools logo"
+                class="logo"
+            >
+
+            <span>SquareSchools</span>
+
+        </div>
+
+
+        <div class="welcome-message">
+
+            <h2>Hello, Welcome!</h2>
+
+        </div>
+
+
+        <div class="authentication-area">
+
+            <div class="login-fields">
+
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="Username"
+                    autocomplete="username"
+                >
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                >
+
+            </div>
+
+
+            <div class="authentication-buttons">
+
+                <button
+                    type="button"
+                    id="signInBtn"
+                    class="dashboard-button"
+                >
+                    Sign In
+                </button>
+
+                <button
+                    type="button"
+                    id="signOutBtn"
+                    class="dashboard-button signout-button"
+                >
+                    Sign Out
+                </button>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="createAccountBtn"
+                class="dashboard-button create-account-button"
+            >
+                Create Account
+            </button>
+
+
+            <div class="user-state">
+
+                <span class="status-dot"></span>
+
+                <span id="authStatus">
+                    Not Authenticated
+                </span>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================================
+         THREE COLUMN DASHBOARD
+    ================================= -->
+
+    <div class="dashboard-layout">
+
+
+        <!-- ============================
+             LEFT SIDEBAR
+        ============================= -->
+
+        <aside class="sidebar left-sidebar">
+
+            <h2>Task Manager</h2>
+
+
+            <button
+                type="button"
+                id="createTaskBtn"
+                class="sidebar-button"
+            >
+                + Create Task
+            </button>
+
+
+            <button
+                type="button"
+                id="viewTasksBtn"
+                class="task-manager-btn"
+            >
+                View Tasks
+            </button>
+
+
+
+            <button
+                type="button"
+                id="updateTaskBtn"
+                class="sidebar-button"
+            >
+                Update Task
+            </button>
+
+
+            <button
+                type="button"
+                id="deleteTaskBtn"
+                class="sidebar-button"
+            >
+                Delete Task
+            </button>
+
+
+            <div class="sidebar-divider"></div>
+
+
+            <h2>Progress</h2>
+
+
+            <div class="progress-stat">
+
+                <span>Task Total</span>
+
+                <strong id="taskTotal">0</strong>
+
+            </div>
+
+
+            <div class="progress-stat">
+
+                <span>Completed Work</span>
+
+                <strong id="completedTasks">0</strong>
+
+            </div>
+
+
+            <div class="progress-stat">
+
+                <span>Outstanding Work</span>
+
+                <strong id="outstandingTasks">0</strong>
+
+            </div>
+
+
+            <div class="progress-stat">
+
+                <span>Calculated Progress</span>
+
+                <strong id="progressPercent">0%</strong>
+
+            </div>
+
+
+            <div class="progress-bar">
+
+                <div
+                    id="progressFill"
+                    class="progress-fill"
+                ></div>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="profileBtn"
+                class="sidebar-button profile-button"
+            >
+                Profile
+            </button>
+
+        </aside>
+
+    
+        <!-- ============================
+             MAIN CONTENT
+        ============================= -->
+
+        <main class="dashboard-main">
+s
+            <div class="dashboard-title">
+
+                <h1>Learner Dashboard</h1>
+c
+    <!-- ================================
+     TASK LIST
+================================= -->
+
+<div class="task-list-panel">
+
+    <h2>My Tasks</h2>
+
+    <div id="taskList">
+
+        <p class="empty-task-message">
+            No tasks created yet.
+        </p>
+
+    </div>
+
+</div>
+
+
+                <!-- ACTIVITIES -->
+
+                <article class="dashboard-card">
+
+                    <div class="card-icon">
+                        📚
+                    </div>
+
+                    <h2>Activities</h2>
+
+                    <p>
+                        Access and manage your learning
+                        activities.
+                    </p>
+
+                    <button
+                        type="button"
+                        class="card-button"
+                        id="activitiesBtn"
+                    >
+                        Open Activities
+                    </button>
+
+                </article>
+
+
+                <!-- MARKS CALCULATOR -->
+
+                <article class="dashboard-card">
+
+                    <div class="card-icon">
+                        🧮
+                    </div>
+
+                    <h2>Marks Calculator</h2>
+
+                    <input
+                        type="number"
+                        id="mark1"
+                        placeholder="Mark 1"
+                        min="0"
+                        max="100"
+                    >
+
+                    <input
+                        type="number"
+                        id="mark2"
+                        placeholder="Mark 2"
+                        min="0"
+                        max="100"
+                    >
+
+                    <input
+                        type="number"
+                        id="mark3"
+                        placeholder="Mark 3"
+                        min="0"
+                        max="100"
+                    >
+
+                    <button
+                        type="button"
+                        class="card-button"
+                        id="calculateMarksBtn"
+                    >
+                        Calculate
+                    </button>
+
+                    <p class="result-text">
+                        Average:
+                        <strong id="marksResult">
+                            0%
+                        </strong>
+                    </p>
+
+                </article>
+
+
+                <!-- STUDY TIMER -->
+
+                <article class="dashboard-card">
+
+                    <div class="card-icon">
+                        ⏱️
+                    </div>
+
+                    <h2>Study Timer</h2>
+
+                    <div
+                        id="timerDisplay"
+                        class="timer-display"
+                    >
+                        25:00
+                    </div>
+
+                    <div class="timer-buttons">
+
+                        <button
+                            type="button"
+                            class="card-button"
+                            id="startTimerBtn"
+                        >
+                            Start
+                        </button>
+
+                        <button
+                            type="button"
+                            class="card-button"
+                            id="pauseTimerBtn"
+                        >
+                            Pause
+                        </button>
+
+                        <button
+                            type="button"
+                            class="card-button"
+                            id="resetTimerBtn"
+                        >
+                            Reset
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- MINI GAME -->
+
+                <article class="dashboard-card">
+
+                    <div class="card-icon">
+                        🎮
+                    </div>
+
+                    <h2>Mini Game</h2>
+
+                    <p>
+                        Test your knowledge and improve
+                        your learning score.
+                    </p>
+
+                    <button
+                        type="button"
+                        class="card-button"
+                        id="startGameBtn"
+                    >
+                        Start Game
+                    </button>
+
+
+                    <div
+                        id="gameArea"
+                        class="game-area"
+                        hidden
+                    >
+
+                        <p id="gameQuestion">
+                            Question
+                        </p>
+
+                        <input
+                            type="number"
+                            id="gameAnswer"
+                            placeholder="Your answer"
+                        >
+
+                        <button
+                            type="button"
+                            class="card-button"
+                            id="submitGameBtn"
+                        >
+                            Submit Answer
+                        </button>
+
+                        <p id="gameScore">
+                            Score: 0
+                        </p>
+
+                    </div>
+
+                </article>
+
+
+                <!-- PROGRESS SUMMARY -->
+
+                <article class="dashboard-card">
+
+                    <div class="card-icon">
+                        📈
+                    </div>
+
+                    <h2>Progress Summary</h2>
+
+                    <p>
+                        Your current calculated progress:
+                    </p>
+
+                    <div
+                        id="summaryProgress"
+                        class="large-progress"
+                    >
+                        0%
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="card-button"
+                        id="printProgressBtn"
+                    >
+                        Print Progress Summary
+                    </button>
+
+                </article>
+
+====================================================================
+                <!-- MULTIMEDIA --
+                 ==================================================
+                <article class="dashboard-card">
+
+                    <div class="card-icon">
+                        🎥
+                    </div>
+
+                    <h2>Learning Resource</h2>
+
+                    <video
+                        id="learningVideo"
+                        class="learning-video"
+                        controls
+                    >
+
+                        <source
+                            src="assets/video/lesson.mp4"
+                            type="video/mp4"
+                        >
+
+                        Your browser does not support video.
+
+                    </video>
+
+                </article>
+
+            </section>
+
+        </main>
+
+
+        <!-- ============================
+             RIGHT SIDEBAR
+        ============================= -->
+
+        <aside class="sidebar right-sidebar">
+
+            <h2>Learner Tools</h2>
+
+
+            <!-- SUPPORT BOOKING -->
+
+            <button
+                type="button"
+                id="bookingToggle"
+                class="sidebar-button"
+            >
+                Support Session Booking
+            </button>
+
+
+            <div
+                id="bookingPanel"
+                class="booking-panel"
+                hidden
+            >
+
+                <h3>Book Support Session</h3>
+
+                <form id="bookingForm">
+
+                    <label for="bookingName">
+                        Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="bookingName"
+                        required
+                    >
+
+
+                    <label for="bookingEmail">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="bookingEmail"
+                        required
+                    >
+
+
+                    <label for="bookingDate">
+                        Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="bookingDate"
+                        required
+                    >
+
+
+                    <label for="bookingTime">
+                        Time
+                    </label>
+
+                    <select
+                        id="bookingTime"
+                        required
+                    >
+
+                        <option value="">
+                            Select Time
+                        </option>
+
+                        <option value="09:00">
+                            09:00
+                        </option>
+
+                        <option value="11:00">
+                            11:00
+                        </option>
+
+                        <option value="14:00">
+                            14:00
+                        </option>
+
+                    </select>
+
+
+                    <button
+                        type="submit"
+                        class="sidebar-button"
+                    >
+                        Book Session
+                    </button>
+
+                </form>
+
+
+                <p
+                    id="bookingStatus"
+                    class="status-message"
+                    aria-live="polite"
+                ></p>
+
+            </div>
+
+
+            <div class="sidebar-divider"></div>
+
+
+            <!-- SEARCH -->
+
+            <label for="taskSearch">
+                Search Tasks
+            </label>
+
+            <input
+                type="search"
+                id="taskSearch"
+                placeholder="Search..."
+            >
+
+
+            <!-- FILTER -->
+
+            <label for="taskFilter">
+                Filter Tasks
+            </label>
+
+            <select id="taskFilter">
+
+                <option value="all">
+                    All Tasks
+                </option>
+
+                <option value="completed">
+                    Completed
+                </option>
+
+                <option value="outstanding">
+                    Outstanding
+                </option>
+
+            </select>
+
+
+            <!-- SORT -->
+
+            <label for="taskSort">
+                Sort Tasks
+            </label>
+
+            <select id="taskSort">
+
+                <option value="name">
+                    Name
+                </option>
+
+                <option value="status">
+                    Status
+                </option>
+
+            </select>
+
+
+            <div class="sidebar-divider"></div>
+
+
+            <!-- PREFERENCES -->
+
+            <h3>Preferences</h3>
+
+
+            <button
+                type="button"
+                id="darkThemeBtn"
+                class="sidebar-button"
+            >
+                Dark Theme
+            </button>
+
+
+            <button
+                type="button"
+                id="lightThemeBtn"
+                class="sidebar-button"
+            >
+                Light Theme
+            </button>
+
+
+            <button
+                type="button"
+                id="displayModeBtn"
+                class="sidebar-button"
+            >
+                Display Mode
+            </button>
+
+        </aside>
+
+    </div>
+
+
+    <script
+        src="ui.js"
+        defer
+    ></script>
+
+</body>
+
+</html>
