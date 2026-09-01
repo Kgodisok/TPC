@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SkillsTrack - Landing Page Wireframe</title>
+
+    <style>
+        /* ================================
+           BASIC WIREFRAME SETTINGS
+        ================================= */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #ffffff;
+            color: #222222;
+        }
+
+
+        /* ================================
+           HEADER
+        ================================= */
+
+        header {
+            height: 80px;
+
+            border-bottom: 2px solid #222222;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 40px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        nav {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        nav a {
+            border: 2px solid #222222;
+
+            padding: 10px 18px;
+
+            text-decoration: none;
+
+            color: #222222;
+
+            font-weight: bold;
+        }
+
+
+        /* ================================
+           HERO
+        ================================= */
+
+        .hero {
+            min-height: 450px;
+
+            border-bottom: 2px solid #222222;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 50px;
+
+            padding: 60px 80px;
+        }
+
+        .hero-content {
+            width: 55%;
+        }
+
+        .hero-content h1 {
+            font-size: 48px;
+
+            margin-bottom: 25px;
+        }
+
+        .hero-content p {
+            font-size: 20px;
+
+            line-height: 1.6;
+
+            margin-bottom: 30px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .button {
+            display: inline-block;
+
+            border: 2px solid #222222;
+
+            padding: 15px 25px;
+
+            text-decoration: none;
+
+            color: #222222;
+
+            font-weight: bold;
+        }
+
+
+        /* ================================
+           DASHBOARD PREVIEW
+        ================================= */
+
+        .dashboard-preview {
+            width: 40%;
+
+            border: 2px solid #222222;
+
+            padding: 25px;
+        }
+
+        .dashboard-preview h2 {
+            margin-bottom: 25px;
+
+            text-align: center;
+        }
+
+        .stat {
+            border: 2px solid #222222;
+
+            padding: 18px;
+
+            margin-bottom: 15px;
+
+            display: flex;
+
+            justify-content: space-between;
+        }
+
+
+        /* ================================
+           FEATURES
+        ================================= */
+
+        .features {
+            padding: 60px 50px;
+
+            border-bottom: 2px solid #222222;
+
+            text-align: center;
+        }
+
+        .features h2 {
+            font-size: 32px;
+
+            margin-bottom: 40px;
+        }
+
+        .feature-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 20px;
+
+            max-width: 1200px;
+
+            margin: auto;
+        }
+
+        .feature-card {
+            min-height: 220px;
+
+            border: 2px solid #222222;
+
+            padding: 30px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: center;
+
+            align-items: center;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+
+            border: 2px solid #222222;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            margin-bottom: 20px;
+
+            font-size: 11px;
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            line-height: 1.5;
+        }
+
+
+        /* ================================
+           ABOUT SECTION
+        ================================= */
+
+        .about {
+            padding: 60px 50px;
+
+            text-align: center;
+
+            border-bottom: 2px solid #222222;
+        }
+
+        .about h2 {
+            font-size: 32px;
+
+            margin-bottom: 25px;
+        }
+
+        .about p {
+            max-width: 800px;
+
+            margin: auto;
+
+            line-height: 1.7;
+
+            font-size: 18px;
+        }
+
+
+        /* ================================
+           FOOTER
+        ================================= */
+
+        footer {
+            padding: 25px;
+
+            text-align: center;
+        }
+
+
+        /* ================================
+           MOBILE
+        ================================= */
+
+        @media (max-width: 800px) {
+
+            header {
+                padding: 20px;
+
+                height: auto;
+
+                flex-direction: column;
+
+                gap: 20px;
+            }
+
+            nav {
+                flex-wrap: wrap;
+
+                justify-content: center;
+            }
+
+            .hero {
+                flex-direction: column;
+
+                padding: 40px 25px;
+            }
+
+            .hero-content,
+            .dashboard-preview {
+                width: 100%;
+            }
+
+            .hero-content h1 {
+                font-size: 36px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <!-- ================================
+         HEADER
+    ================================= -->
+
+    <header>
+
+        <div class="logo">
+            SKILLSTRACK
+        </div>
+
+        <nav>
+
+            <a href="signin.html">
+                SIGN IN
+            </a>
+
+            <a href="create-account.html">
+                CREATE ACCOUNT
+            </a>
+
+        </nav>
+
+    </header>
+
+
+    <!-- ================================
+         HERO SECTION
+    ================================= -->
+
+    <main>
+
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <h1>
+                    LEARNER MANAGEMENT
+                    <br>
+                    PORTAL
+                </h1>
+
+                <p>
+                    Manage your learning tasks, track your progress,
+                    request support and improve your programming skills
+                    in one place.
+                </p>
+
+                <div class="hero-buttons">
+
+                    <a
+                        href="signin.html"
+                        class="button"
+                    >
+                        SIGN IN
+                    </a>
+
+                    <a
+                        href="create-account.html"
+                        class="button"
+                    >
+                        CREATE ACCOUNT
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- DASHBOARD PREVIEW -->
+
+            <div class="dashboard-preview">
+
+                <h2>
+                    LEARNER DASHBOARD
+                </h2>
+
+                <div class="stat">
+
+                    <span>
+                        TOTAL TASKS
+                    </span>
+
+                    <strong>
+                        20
+                    </strong>
+
+                </div>
+
+                <div class="stat">
+
+                    <span>
+                        COMPLETED
+                    </span>
+
+                    <strong>
+                        12
+                    </strong>
+
+                </div>
+
+                <div class="stat">
+
+                    <span>
+                        OUTSTANDING
+                    </span>
+
+                    <strong>
+                        8
+                    </strong>
+
+                </div>
+
+                <div class="stat">
+
+                    <span>
+                        PROGRESS
+                    </span>
+
+                    <strong>
+                        60%
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================
+             FEATURES
+        ================================= -->
+
+        <section
+            class="features"
+            id="features"
+        >
+
+            <h2>
+                WHAT YOU CAN DO
+            </h2>
+
+
+            <div class="feature-grid">
+
+
+                <!-- TASK MANAGEMENT -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        ICON
+                    </div>
+
+                    <h3>
+                        TASK MANAGEMENT
+                    </h3>
+
+                    <p>
+                        Create, view, update and delete
+                        learning tasks.
+                    </p>
+
+                </div>
+
+
+                <!-- PROGRESS -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        ICON
+                    </div>
+
+                    <h3>
+                        PROGRESS
+                    </h3>
+
+                    <p>
+                        Track completed and outstanding
+                        learning tasks.
+                    </p>
+
+                </div>
+
+
+                <!-- SUPPORT -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        ICON
+                    </div>
+
+                    <h3>
+                        SUPPORT
+                    </h3>
+
+                    <p>
+                        Request and book learner
+                        support sessions.
+                    </p>
+
+                </div>
+
+
+                <!-- PROGRAMMING GAME -->
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        ICON
+                    </div>
+
+                    <h3>
+                        PROGRAMMING GAME
+                    </h3>
+
+                    <p>
+                        Reinforce basic programming
+                        concepts through a mini-game.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================
+             ABOUT
+        ================================= -->
+
+        <section
+            class="about"
+            id="about"
+        >
+
+            <h2>
+                ABOUT SKILLSTRACK
+            </h2>
+
+            <p>
+                SkillsTrack provides learners with a central
+                place to manage learning activities, monitor
+                progress, access support and develop programming
+                skills.
+            </p>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================================
+         FOOTER
+    ================================= -->
+
+    <footer>
+
+        <p>
+            © 2026 SkillsTrack
+        </p>
+
+    </footer>
+
+</body>
+</html>

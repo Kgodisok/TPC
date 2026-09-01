@@ -1,0 +1,1105 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>SkillsTrack - Task Manager</title>
+
+    <style>
+
+        /* ================================
+           RESET
+        ================================= */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #ffffff;
+            color: #222222;
+            min-height: 100vh;
+        }
+
+
+        /* ================================
+           HEADER
+        ================================= */
+
+        header {
+            height: 80px;
+
+            border-bottom: 2px solid #222222;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-button,
+        .sign-out {
+            padding: 10px 18px;
+
+            border: 2px solid #222222;
+
+            background: #eeeeee;
+
+            color: #222222;
+
+            text-decoration: none;
+
+            font-weight: bold;
+        }
+
+
+        /* ================================
+           PAGE
+        ================================= */
+
+        .page {
+            padding: 30px;
+
+            max-width: 1400px;
+
+            margin: auto;
+        }
+
+
+        .page-title {
+            margin-bottom: 25px;
+        }
+
+        .page-title h1 {
+            font-size: 34px;
+            margin-bottom: 8px;
+        }
+
+        .page-title p {
+            line-height: 1.5;
+        }
+
+
+        /* ================================
+           CONTROLS
+        ================================= */
+
+        .controls {
+            border: 2px solid #222222;
+
+            padding: 20px;
+
+            margin-bottom: 25px;
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 180px 150px;
+
+            gap: 15px;
+        }
+
+        .search-box,
+        .filter-box {
+            padding: 12px;
+
+            border: 2px solid #222222;
+
+            font-size: 15px;
+        }
+
+        .create-button {
+            padding: 12px;
+
+            border: 2px solid #222222;
+
+            background: #eeeeee;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+
+        /* ================================
+           TASK FORM
+        ================================= */
+
+        .task-form {
+            border: 2px solid #222222;
+
+            padding: 25px;
+
+            margin-bottom: 25px;
+
+            display: none;
+        }
+
+        .task-form.show {
+            display: block;
+        }
+
+        .task-form h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 5px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+
+            font-weight: bold;
+
+            margin-bottom: 8px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+
+            padding: 12px;
+
+            border: 2px solid #222222;
+
+            font-family: Arial, sans-serif;
+
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 100px;
+
+            resize: vertical;
+        }
+
+        .form-buttons {
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 20px;
+        }
+
+        .save-button,
+        .cancel-button {
+            padding: 12px 20px;
+
+            border: 2px solid #222222;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .save-button {
+            background: #eeeeee;
+        }
+
+        .cancel-button {
+            background: #ffffff;
+        }
+
+
+        /* ================================
+           TASK SUMMARY
+        ================================= */
+
+        .summary {
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 15px;
+
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            border: 2px solid #222222;
+
+            padding: 20px;
+
+            text-align: center;
+        }
+
+        .summary-card strong {
+            display: block;
+
+            font-size: 30px;
+
+            margin-top: 8px;
+        }
+
+
+        /* ================================
+           TASK LIST
+        ================================= */
+
+        .task-section {
+            border: 2px solid #222222;
+
+            padding: 25px;
+        }
+
+        .task-section h2 {
+            margin-bottom: 20px;
+        }
+
+        .task {
+            border: 2px solid #222222;
+
+            padding: 20px;
+
+            margin-bottom: 15px;
+
+            display: grid;
+
+            grid-template-columns: 1fr auto;
+
+            gap: 20px;
+        }
+
+        .task:last-child {
+            margin-bottom: 0;
+        }
+
+        .task h3 {
+            margin-bottom: 8px;
+        }
+
+        .task p {
+            margin-bottom: 10px;
+
+            line-height: 1.5;
+        }
+
+        .task-meta {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+            font-size: 13px;
+        }
+
+        .task-meta span {
+            border: 1px solid #222222;
+
+            padding: 5px 8px;
+        }
+
+
+        /* ================================
+           TASK ACTIONS
+        ================================= */
+
+        .task-actions {
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+        }
+
+        .task-actions button {
+            padding: 9px 12px;
+
+            border: 2px solid #222222;
+
+            background: #eeeeee;
+
+            cursor: pointer;
+
+            font-weight: bold;
+        }
+
+
+        /* ================================
+           STATUS
+        ================================= */
+
+        .status-completed {
+            font-weight: bold;
+        }
+
+        .status-outstanding {
+            font-weight: bold;
+        }
+
+
+        /* ================================
+           FOOTER
+        ================================= */
+
+        footer {
+            margin-top: 30px;
+
+            border-top: 2px solid #222222;
+
+            padding: 20px;
+
+            text-align: center;
+
+            font-size: 14px;
+        }
+
+
+        /* ================================
+           MOBILE
+        ================================= */
+
+        @media (max-width: 900px) {
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .summary {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .task {
+                grid-template-columns: 1fr;
+            }
+
+            .task-actions {
+                justify-content: flex-start;
+            }
+        }
+
+
+        @media (max-width: 600px) {
+
+            header {
+                height: auto;
+
+                padding: 20px;
+
+                flex-direction: column;
+
+                gap: 15px;
+            }
+
+            .page {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ================================
+         HEADER
+    ================================= -->
+
+    <header>
+
+        <div class="logo">
+            SKILLSTRACK
+        </div>
+
+
+        <div class="header-right">
+
+            <a
+                href="dashboard.html"
+                class="back-button"
+            >
+                DASHBOARD
+            </a>
+
+
+            <a
+                href="landing.html"
+                class="sign-out"
+            >
+                SIGN OUT
+            </a>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- ================================
+         MAIN PAGE
+    ================================= -->
+
+    <main class="page">
+
+
+        <section class="page-title">
+
+            <h1>
+                TASK MANAGER
+            </h1>
+
+            <p>
+                Create, view, update and delete your
+                learning tasks.
+            </p>
+
+        </section>
+
+
+
+        <!-- ================================
+             CONTROLS
+        ================================= -->
+
+        <section class="controls">
+
+            <input
+                type="search"
+                id="searchInput"
+                class="search-box"
+                placeholder="Search tasks..."
+            >
+
+
+            <select
+                id="filterSelect"
+                class="filter-box"
+            >
+
+                <option value="all">
+                    All Tasks
+                </option>
+
+                <option value="completed">
+                    Completed
+                </option>
+
+                <option value="outstanding">
+                    Outstanding
+                </option>
+
+            </select>
+
+
+            <button
+                type="button"
+                class="create-button"
+                id="showFormButton"
+            >
+                + CREATE TASK
+            </button>
+
+        </section>
+
+
+
+        <!-- ================================
+             CREATE / UPDATE FORM
+        ================================= -->
+
+        <section
+            class="task-form"
+            id="taskForm"
+        >
+
+            <h2 id="formTitle">
+                CREATE TASK
+            </h2>
+
+
+            <form id="taskFormElement">
+
+                <div class="form-grid">
+
+
+                    <div class="form-group">
+
+                        <label for="taskTitle">
+                            Task Title
+                        </label>
+
+                        <input
+                            type="text"
+                            id="taskTitle"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <div class="form-group">
+
+                        <label for="taskModule">
+                            Module
+                        </label>
+
+                        <input
+                            type="text"
+                            id="taskModule"
+                            placeholder="e.g. JavaScript"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <div class="form-group full">
+
+                        <label for="taskDescription">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="taskDescription"
+                            placeholder="Describe the task..."
+                            required
+                        ></textarea>
+
+                    </div>
+
+
+
+                    <div class="form-group">
+
+                        <label for="taskDueDate">
+                            Due Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="taskDueDate"
+                            required
+                        >
+
+                    </div>
+
+
+
+                    <div class="form-group">
+
+                        <label for="taskStatus">
+                            Status
+                        </label>
+
+                        <select id="taskStatus">
+
+                            <option value="outstanding">
+                                Outstanding
+                            </option>
+
+                            <option value="completed">
+                                Completed
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-buttons">
+
+                    <button
+                        type="submit"
+                        class="save-button"
+                    >
+                        SAVE TASK
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="cancel-button"
+                        id="cancelButton"
+                    >
+                        CANCEL
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+
+        <!-- ================================
+             SUMMARY
+        ================================= -->
+
+        <section class="summary">
+
+
+            <div class="summary-card">
+
+                TOTAL
+
+                <strong id="totalCount">
+                    3
+                </strong>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                COMPLETED
+
+                <strong id="completedCount">
+                    1
+                </strong>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                OUTSTANDING
+
+                <strong id="outstandingCount">
+                    2
+                </strong>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                PROGRESS
+
+                <strong id="progressCount">
+                    33%
+                </strong>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ================================
+             TASK LIST
+        ================================= -->
+
+        <section class="task-section">
+
+            <h2>
+                MY TASKS
+            </h2>
+
+
+            <div id="taskList">
+
+
+                <!-- TASK 1 -->
+
+                <article
+                    class="task"
+                    data-status="outstanding"
+                >
+
+                    <div>
+
+                        <h3>
+                            Complete HTML Exercise
+                        </h3>
+
+                        <p>
+                            Complete the HTML fundamentals
+                            exercise and submit the answers.
+                        </p>
+
+                        <div class="task-meta">
+
+                            <span>
+                                Module: Web Development
+                            </span>
+
+                            <span>
+                                Due: 10 September 2026
+                            </span>
+
+                            <span class="status-outstanding">
+                                OUTSTANDING
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="task-actions">
+
+                        <button
+                            type="button"
+                            onclick="editTask(this)"
+                        >
+                            EDIT
+                        </button>
+
+                        <button
+                            type="button"
+                            onclick="deleteTask(this)"
+                        >
+                            DELETE
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+
+                <!-- TASK 2 -->
+
+                <article
+                    class="task"
+                    data-status="outstanding"
+                >
+
+                    <div>
+
+                        <h3>
+                            JavaScript Variables
+                        </h3>
+
+                        <p>
+                            Complete the JavaScript variables
+                            practical activity.
+                        </p>
+
+                        <div class="task-meta">
+
+                            <span>
+                                Module: JavaScript
+                            </span>
+
+                            <span>
+                                Due: 12 September 2026
+                            </span>
+
+                            <span class="status-outstanding">
+                                OUTSTANDING
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="task-actions">
+
+                        <button
+                            type="button"
+                            onclick="editTask(this)"
+                        >
+                            EDIT
+                        </button>
+
+                        <button
+                            type="button"
+                            onclick="deleteTask(this)"
+                        >
+                            DELETE
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+
+                <!-- TASK 3 -->
+
+                <article
+                    class="task"
+                    data-status="completed"
+                >
+
+                    <div>
+
+                        <h3>
+                            Introduction to Programming
+                        </h3>
+
+                        <p>
+                            Complete the introductory
+                            programming activity.
+                        </p>
+
+                        <div class="task-meta">
+
+                            <span>
+                                Module: Programming
+                            </span>
+
+                            <span>
+                                Due: 05 September 2026
+                            </span>
+
+                            <span class="status-completed">
+                                COMPLETED
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="task-actions">
+
+                        <button
+                            type="button"
+                            onclick="editTask(this)"
+                        >
+                            EDIT
+                        </button>
+
+                        <button
+                            type="button"
+                            onclick="deleteTask(this)"
+                        >
+                            DELETE
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- ================================
+         FOOTER
+    ================================= -->
+
+    <footer>
+
+        <p>
+            © 2026 SkillsTrack
+        </p>
+
+    </footer>
+
+
+
+    <!-- ================================
+         JAVASCRIPT
+    ================================= -->
+
+    <script>
+
+        const showFormButton =
+            document.getElementById("showFormButton");
+
+        const taskForm =
+            document.getElementById("taskForm");
+
+        const cancelButton =
+            document.getElementById("cancelButton");
+
+        const taskFormElement =
+            document.getElementById("taskFormElement");
+
+        const taskList =
+            document.getElementById("taskList");
+
+        const searchInput =
+            document.getElementById("searchInput");
+
+        const filterSelect =
+            document.getElementById("filterSelect");
+
+
+        let editingTask = null;
+
+
+
+        /* ================================
+           SHOW CREATE FORM
+        ================================= */
+
+        showFormButton.addEventListener(
+            "click",
+            function () {
+
+                editingTask = null;
+
+                document.getElementById(
+                    "formTitle"
+                ).textContent = "CREATE TASK";
+
+                taskFormElement.reset();
+
+                taskForm.classList.add("show");
+
+            }
+        );
+
+
+
+        /* ================================
+           CANCEL
+        ================================= */
+
+        cancelButton.addEventListener(
+            "click",
+            function () {
+
+                taskForm.classList.remove("show");
+
+                editingTask = null;
+
+                taskFormElement.reset();
+
+            }
+        );
+
+
+
+        /* ================================
+           CREATE TASK
+        ================================= */
+
+        taskFormElement.addEventListener(
+            "submit",
+            function (event) {
+
+                event.preventDefault();
+
+
+                const title =
+                    document.getElementById(
+                        "taskTitle"
+                    ).value;
+
+                const module =
+                    document.getElementById(
+                        "taskModule"
+                    ).value;
+
+                const description =
+                    document.getElementById(
+                        "taskDescription"
+                    ).value;
+
+                const dueDate =
+                    document.getElementById(
+                        "taskDueDate"
+                    ).value;
+
+                const status =
+                    document.getElementById(
+                        "taskStatus"
+                    ).value;
+
+
+                if (editingTask) {
+
+                    updateExistingTask(
+                        editingTask,
+                        title,
+                        module,
+                        description,
+                        dueDate,
+                        status
+                    );
+
+                } else {
+
+                    createTask(
+                        title,
+                        module,
+                        description,
+                        dueDate,
+                        status
+                    );
+
+                }
+
+
+                taskForm.classList.remove("show");
+
+                taskFormElement.reset();
+
+                editingTask = null;
+
+                updateSummary();
+
+            }
+        );
+
+
+
+        /* ================================
+           CREATE NEW TASK
+        ================================= */
+
+       
+```
