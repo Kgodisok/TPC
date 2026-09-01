@@ -1,4 +1,4 @@
-/*class User {
+class User {
     constructor(uid, displayName, email) {
         this.uid = uid;
         this.displayName = displayName;
@@ -38,5 +38,3 @@ function calculateProgress(tasks) {
 }
 
 module.exports = { User, Task, calculateProgress };
-
-*/

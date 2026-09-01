@@ -1,7 +1,69 @@
+# Dependencies
 node_modules/
+package-lock.json
+yarn.lock
+
+# Environment variables
 .env
-.env.*
+.env.local
+.env.*.local
 !.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 firebase-debug.log
+
+# OS
 .DS_Store
-.vscode/*.log
+Thumbs.db
+.gitkeep
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Firebase
+.firebase/
+.firebaserc
+firebase-debug.log*
+firebase-export-*.json
+
+# Local development
+.cache/
+tmp/
+temp/
+
+# IDE specific
+.vscode/settings.json
+.idea/workspace.xml
+.idea/tasks.xml
+
+# OS specific
+.env.local.php
+*.pem
+*.key
+*.cert
