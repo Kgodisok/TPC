@@ -1,6 +1,6 @@
 
-Figma Design Project:
-https://www.figma.com/make/qGsRICJkncdDbpPOQC8vBm/Learner-Dashboard?t=IQ8KSbTfO6x7GYZc-1
+Figma Design Project Link:
+https://www.figma.com/design/czKqRoteDn02IGBXWD347v/Login-Page?node-id=0-1&t=p9m7lrjxZ0gHMONc-1
 
 SkillsTrack Learner Support Portal
 
