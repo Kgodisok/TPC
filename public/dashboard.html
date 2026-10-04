@@ -1,19 +1,152 @@
-<!-- SkillsTrack Learner Support Portal
-     PHASE 2 IMPLEMENTATION
-     
-     This HTML file is planned for Phase 2 development.
-     See README.md and ARCHITECTURE.md for detailed specifications.
-     
-     Status: PLANNED - Ready for implementation in Phase 2
--->
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <title>SkillsTrack - Coming Soon</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SkillsTrack | Dashboard</title>
+    <link rel="stylesheet" href="../style.css" />
   </head>
-  <body>
-    <h1>SkillsTrack Learner Support Portal</h1>
-    <p>This page is planned for Phase 2 implementation.</p>
-    <p>See <a href="README.md">README.md</a> and <a href="ARCHITECTURE.md">ARCHITECTURE.md</a> for details.</p>
+  <body data-page="dashboard">
+    <header class="dashboard-header">
+      <div class="brand-block">
+        <span class="brand-mark">S</span>
+        <span>SkillsTrack</span>
+      </div>
+      <div>
+        <p class="eyebrow">Welcome</p>
+        <h1 id="welcomeName">Learner</h1>
+      </div>
+      <div class="header-actions">
+        <button id="printSummary" class="secondary-button" type="button">Print summary</button>
+        <button id="logoutButton" class="nav-button danger" type="button">Log out</button>
+      </div>
+    </header>
+
+    <main class="dashboard-shell">
+      <aside class="sidebar-panel left-panel">
+        <h2>Progress</h2>
+        <div class="mini-stat">
+          <span>Total tasks</span>
+          <strong id="totalTasks">0</strong>
+        </div>
+        <div class="mini-stat">
+          <span>Completed</span>
+          <strong id="completedTasks">0</strong>
+        </div>
+        <div class="mini-stat">
+          <span>Outstanding</span>
+          <strong id="outstandingTasks">0</strong>
+        </div>
+        <div class="mini-stat highlight">
+          <span>Progress</span>
+          <strong id="progressPercent">0%</strong>
+        </div>
+        <div class="track"><span id="sidebarProgressBar" style="width: 0%"></span></div>
+      </aside>
+
+      <section class="main-panel">
+        <div class="panel-block">
+          <div class="panel-topline">
+            <h2>My tasks</h2>
+            <div class="inline-tools">
+              <input id="taskSearch" type="search" placeholder="Search tasks" aria-label="Search tasks" />
+              <select id="taskFilter">
+                <option value="all">All tasks</option>
+                <option value="completed">Completed</option>
+                <option value="pending">Outstanding</option>
+              </select>
+              <select id="taskSort">
+                <option value="newest">Newest</option>
+                <option value="due-date">Due date</option>
+                <option value="priority">Priority</option>
+              </select>
+            </div>
+          </div>
+          <div id="taskList" class="task-list"></div>
+        </div>
+
+        <div class="panel-block">
+          <h2>Add task</h2>
+          <form id="taskForm" class="stack-form">
+            <div class="two-column">
+              <label>
+                Task title
+                <input id="taskTitle" type="text" placeholder="Submit portfolio draft" required />
+              </label>
+              <label>
+                Due date
+                <input id="taskDueDate" type="date" required />
+              </label>
+            </div>
+            <div class="two-column">
+              <label>
+                Priority
+                <select id="taskPriority">
+                  <option value="High">High</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </label>
+              <label>
+                Status
+                <select id="taskStatus">
+                  <option value="Pending" selected>Pending</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              Description
+              <textarea id="taskDescription" rows="3" placeholder="Describe the task details..."></textarea>
+            </label>
+            <button class="primary-button" type="submit">Save task</button>
+          </form>
+        </div>
+
+        <div class="panel-block">
+          <h2>Book support</h2>
+          <form id="bookingForm" class="stack-form">
+            <div class="two-column">
+              <label>
+                Session date
+                <input id="bookingDate" type="date" required />
+              </label>
+              <label>
+                Support type
+                <select id="bookingType">
+                  <option value="Career advice">Career advice</option>
+                  <option value="Study support">Study support</option>
+                  <option value="Technical coaching">Technical coaching</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              Notes
+              <textarea id="bookingNotes" rows="3" placeholder="Tell us what you need help with" required></textarea>
+            </label>
+            <button class="secondary-button" type="submit">Book session</button>
+          </form>
+          <div id="bookingStatus" class="booking-status" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <aside class="sidebar-panel right-panel">
+        <div class="game-card">
+          <h2>Quick challenge</h2>
+          <button id="startGame" class="primary-button full-width" type="button">Start game</button>
+          <div id="gameArea" class="game-area" aria-label="Mini game area">
+            <div id="gameTarget" class="game-target"></div>
+          </div>
+          <p class="game-score">Score: <strong id="gameScore">0</strong></p>
+        </div>
+
+        <div class="audio-card">
+          <h2>Focus audio</h2>
+          <audio controls src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+        </div>
+      </aside>
+    </main>
+
+    <script src="../js/app.js"></script>
   </body>
 </html>

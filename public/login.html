@@ -1,19 +1,64 @@
-<!-- SkillsTrack Learner Support Portal
-     PHASE 2 IMPLEMENTATION
-     
-     This HTML file is planned for Phase 2 development.
-     See README.md and ARCHITECTURE.md for detailed specifications.
-     
-     Status: PLANNED - Ready for implementation in Phase 2
--->
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <title>SkillsTrack - Coming Soon</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SkillsTrack | Sign in</title>
+    <link rel="stylesheet" href="../style.css" />
   </head>
-  <body>
-    <h1>SkillsTrack Learner Support Portal</h1>
-    <p>This page is planned for Phase 2 implementation.</p>
-    <p>See <a href="README.md">README.md</a> and <a href="ARCHITECTURE.md">ARCHITECTURE.md</a> for details.</p>
+  <body data-page="login">
+    <header class="site-header">
+      <div class="brand-block">
+        <span class="brand-mark">S</span>
+        <span>SkillsTrack</span>
+      </div>
+      <nav class="main-nav">
+        <a href="../index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+      </nav>
+      <a class="nav-button" href="../index.html">Back home</a>
+    </header>
+
+    <main class="auth-shell">
+      <section class="auth-card">
+        <div class="tab-row">
+          <button class="auth-tab active" data-auth-tab="login" type="button">Sign in</button>
+          <button class="auth-tab" data-auth-tab="register" type="button">Create account</button>
+        </div>
+
+        <form id="loginForm" class="auth-form active">
+          <h1>Welcome back</h1>
+          <p class="supporting-text">Enter your details to continue to your dashboard.</p>
+
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" placeholder="you@example.com" required />
+
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" placeholder="Your password" required />
+
+          <button class="primary-button full-width" type="submit">Sign in</button>
+        </form>
+
+        <form id="registerForm" class="auth-form hidden">
+          <h1>Create account</h1>
+          <p class="supporting-text">Set up your learning portal in a few seconds.</p>
+
+          <label for="registerName">Full name</label>
+          <input id="registerName" type="text" placeholder="Your full name" required />
+
+          <label for="registerEmail">Email</label>
+          <input id="registerEmail" type="email" placeholder="you@example.com" required />
+
+          <label for="registerPassword">Password</label>
+          <input id="registerPassword" type="password" placeholder="Create a password" required />
+
+          <button class="primary-button full-width" type="submit">Create account</button>
+        </form>
+
+        <p id="authMessage" class="auth-message" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script src="../js/app.js"></script>
   </body>
 </html>

@@ -1,20 +1,28 @@
-/**
- * SkillsTrack Learner Support Portal - Server Entry Point
- *
- * PHASE 2 IMPLEMENTATION
- *
- * This file will contain:
- * - Express/Node server setup (Phase 2+)
- * - Server configuration
- * - Route initialization
- * - Error handling
- * - Database connection
- *
- * Planning Reference: See ARCHITECTURE.md for backend architecture
- * Status: PLANNED - Phase 1 uses client-side only, Phase 2+ will add backend
- */
+const express = require('express');
+const path = require('path');
 
-// TODO: Set up Express server
-// TODO: Configure middleware
-// TODO: Initialize routes
-// TODO: Connect to Firebase
+const app = express();
+const port = process.env.PORT || 3000;
+const rootDir = path.join(__dirname, '..');
+
+app.use(express.static(rootDir));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(rootDir, 'index.html'));
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(rootDir, 'public', 'login.html'));
+});
+
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(rootDir, 'public', 'dashboard.html'));
+});
+
+app.use((req, res) => {
+    res.status(404).send('Page not found');
+});
+
+app.listen(port, () => {
+    console.log(`SkillsTrack is running at http://localhost:${port}`);
+});
