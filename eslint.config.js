@@ -15,7 +15,8 @@ module.exports = [
                 process: 'readonly',
                 require: 'readonly',
                 module: 'readonly',
-                __dirname: 'readonly'
+                __dirname: 'readonly',
+                fetch: 'readonly'
             }
         },
         rules: {
