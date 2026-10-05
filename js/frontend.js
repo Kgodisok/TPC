@@ -1,4 +1,38 @@
 const STORAGE_KEY = 'skillsTrackPortal';
+const FIREBASE_CONFIG = {
+    apiKey: 'demo-api-key',
+    authDomain: 'skills-track-demo.firebaseapp.com',
+    projectId: 'skills-track-demo',
+    storageBucket: 'skills-track-demo.appspot.com',
+    messagingSenderId: '1234567890',
+    appId: '1:1234567890:web:demo-app-id'
+};
+
+function getFirebaseConfig() {
+    if (window.__FIREBASE_CONFIG__) {
+        return { ...FIREBASE_CONFIG, ...window.__FIREBASE_CONFIG__ };
+    }
+
+    return FIREBASE_CONFIG;
+}
+
+function isFirebaseReady() {
+    const config = getFirebaseConfig();
+    const hasRealValues = Boolean(config.apiKey && config.apiKey !== 'demo-api-key' && config.projectId && config.projectId !== 'skills-track-demo');
+    return Boolean(window.firebase && hasRealValues);
+}
+
+function getAuthClient() {
+    if (!isFirebaseReady()) {
+        return null;
+    }
+
+    if (!window.firebase.apps.length) {
+        window.firebase.initializeApp(getFirebaseConfig());
+    }
+
+    return window.firebase.auth();
+}
 
 function getState() {
     try {
@@ -96,6 +130,28 @@ function handleLoginSubmit(event) {
     event.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
+    const auth = getAuthClient();
+
+    if (auth) {
+        auth.signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                const currentUser = userCredential.user;
+                const state = getState();
+                state.session = {
+                    id: currentUser.uid,
+                    name: currentUser.displayName || currentUser.email.split('@')[0],
+                    email: currentUser.email
+                };
+                saveState(state);
+                setAuthMessage('Logged in successfully. Redirecting...', 'success');
+                setTimeout(() => redirectToDashboard(), 500);
+            })
+            .catch((error) => {
+                setAuthMessage(error.message || 'Unable to sign in right now.', 'error');
+            });
+        return;
+    }
+
     const state = getState();
     const match = state.users.find((user) => user.email.toLowerCase() === email.toLowerCase() && user.password === password);
 
@@ -121,6 +177,34 @@ function handleRegisterSubmit(event) {
         return;
     }
 
+    const auth = getAuthClient();
+    if (auth) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                const currentUser = userCredential.user;
+                if (currentUser && typeof currentUser.updateProfile === 'function') {
+                    return currentUser.updateProfile({ displayName: name }).then(() => currentUser);
+                }
+
+                return currentUser;
+            })
+            .then((currentUser) => {
+                const state = getState();
+                state.session = {
+                    id: currentUser.uid,
+                    name: currentUser.displayName || name,
+                    email: currentUser.email
+                };
+                saveState(state);
+                setAuthMessage('Account created successfully. Redirecting...', 'success');
+                setTimeout(() => redirectToDashboard(), 500);
+            })
+            .catch((error) => {
+                setAuthMessage(error.message || 'Unable to create account.', 'error');
+            });
+        return;
+    }
+
     const state = getState();
     const existing = state.users.find((user) => user.email.toLowerCase() === email.toLowerCase());
     if (existing) {
@@ -137,11 +221,32 @@ function handleRegisterSubmit(event) {
 }
 
 function getCurrentUser() {
+    const auth = getAuthClient();
+    if (auth && auth.currentUser) {
+        return {
+            id: auth.currentUser.uid,
+            name: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || 'Learner',
+            email: auth.currentUser.email
+        };
+    }
+
     const state = getState();
     return state.session ? state.users.find((user) => user.id === state.session.id) : null;
 }
 
 function ensureSession() {
+    const auth = getAuthClient();
+    if (auth && auth.currentUser) {
+        const state = getState();
+        state.session = {
+            id: auth.currentUser.uid,
+            name: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || 'Learner',
+            email: auth.currentUser.email
+        };
+        saveState(state);
+        return;
+    }
+
     const state = getState();
     if (!state.session) {
         const demoUser = state.users[0];
@@ -479,6 +584,25 @@ function setupGame() {
 }
 
 function handleLogout() {
+    const auth = getAuthClient();
+
+    if (auth) {
+        auth.signOut()
+            .then(() => {
+                const state = getState();
+                state.session = null;
+                saveState(state);
+                window.location.href = '../index.html';
+            })
+            .catch(() => {
+                const state = getState();
+                state.session = null;
+                saveState(state);
+                window.location.href = '../index.html';
+            });
+        return;
+    }
+
     const state = getState();
     state.session = null;
     saveState(state);
