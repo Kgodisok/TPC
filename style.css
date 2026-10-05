@@ -1,15 +1,15 @@
 :root {
-  --navy: #edf7ff;
-  --navy-strong: #dfeeff;
-  --accent: #4d9ae6;
-  --accent-dark: #2d77c7;
-  --secondary: #f7fbff;
-  --text: #183b5b;
-  --muted: #58718b;
-  --success: #2ea36a;
-  --danger: #d94d4d;
+  --navy: #fff0e5;
+  --navy-strong: #ffdfc7;
+  --accent: #e8793b;
+  --accent-dark: #a8471d;
+  --secondary: #fff7df;
+  --text: #3d3028;
+  --muted: #76675e;
+  --success: #27865e;
+  --danger: #c7433b;
   --panel: #ffffff;
-  --shadow: 0 18px 40px rgba(61, 110, 163, 0.12);
+  --shadow: 0 18px 40px rgba(132, 77, 42, 0.12);
 }
 
 * {
@@ -23,7 +23,7 @@ html {
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
-  background: linear-gradient(180deg, #f2f8ff 0%, #edf3f8 100%);
+  background: linear-gradient(180deg, #fffaf5 0%, #fff3e5 100%);
   color: var(--text);
 }
 
@@ -45,10 +45,10 @@ select {
   justify-content: space-between;
   gap: 24px;
   padding: 18px 6vw;
-  background: linear-gradient(180deg, #f5fbff 0%, #edf6ff 100%);
+  background: linear-gradient(180deg, #fff9f3 0%, #fff0e3 100%);
   color: var(--text);
-  box-shadow: 0 8px 24px rgba(50, 90, 132, 0.12);
-  border-bottom: 1px solid #dfeefb;
+  box-shadow: 0 8px 24px rgba(132, 77, 42, 0.12);
+  border-bottom: 1px solid #f3dccb;
 }
 
 .brand-block {
@@ -75,7 +75,7 @@ select {
   display: flex;
   align-items: center;
   gap: 20px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text);
 }
 
 .nav-button,
@@ -104,7 +104,7 @@ button {
 .nav-button,
 .primary-button {
   background: var(--accent);
-  color: var(--navy-strong);
+  color: #ffffff;
 }
 
 .nav-button.danger {
@@ -113,8 +113,8 @@ button {
 }
 
 .secondary-button {
-  background: #dfeefb;
-  color: var(--navy-strong);
+  background: #dff3ff;
+  color: var(--text);
 }
 
 .primary-button:hover,
@@ -130,7 +130,7 @@ button:hover {
   align-items: center;
   gap: 32px;
   padding: 76px 6vw 56px;
-  background: linear-gradient(135deg, #f6fbff 0%, #e8f4ff 50%, #edf7ff 100%);
+  background: linear-gradient(135deg, #fff0e2 0%, #e7f6ff 55%, #fff5cf 100%);
   color: var(--text);
 }
 
@@ -178,8 +178,8 @@ button:hover {
   min-width: 140px;
   padding: 18px 16px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid #f1ddc7;
 }
 
 .stat-box strong {
@@ -204,8 +204,8 @@ button:hover {
   display: inline-flex;
   padding: 7px 12px;
   border-radius: 999px;
-  background: rgba(80, 181, 255, 0.16);
-  color: #a9dfff;
+  background: #fff0d4;
+  color: #8b4c10;
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -222,7 +222,7 @@ button:hover {
   width: 100%;
   height: 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
+  background: #e2f1fa;
   overflow: hidden;
 }
 
@@ -230,7 +230,7 @@ button:hover {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #8ee3ff 0%, #50b5ff 100%);
+  background: linear-gradient(90deg, #f4c34e 0%, #e8793b 100%);
 }
 
 .checklist {
@@ -286,9 +286,9 @@ button:hover {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  background: #eaf6ff;
-  border-top: 1px solid #dfeef9;
-  border-bottom: 1px solid #dfeef9;
+  background: #fff5d6;
+  border-top: 1px solid #f2e2b8;
+  border-bottom: 1px solid #f2e2b8;
 }
 
 .support-banner h2 {
@@ -299,14 +299,14 @@ button:hover {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
-  background: linear-gradient(135deg, #f6fbff 0%, #ebf5ff 100%);
+  background: linear-gradient(135deg, #fff3e8 0%, #eaf6ff 55%, #fff6d9 100%);
   color: var(--text);
 }
 
 .summary-strip div {
   padding: 20px;
   background: rgba(255, 255, 255, 0.8);
-  border: 1px solid #dfeefb;
+  border: 1px solid #f0dfcf;
   border-radius: 14px;
 }
 
@@ -351,13 +351,13 @@ button:hover {
 
 .auth-tab {
   padding: 0.75rem 1rem;
-  background: #edf4fb;
+  background: #fff3e8;
   color: var(--text);
   font-weight: 700;
 }
 
 .auth-tab.active {
-  background: var(--navy);
+  background: var(--accent);
   color: white;
 }
 
@@ -472,7 +472,7 @@ button:hover {
 }
 
 .mini-stat.highlight {
-  color: var(--navy);
+  color: var(--accent-dark);
   font-weight: 700;
 }
 
@@ -552,8 +552,8 @@ button:hover {
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 700;
-  background: #ebf4ff;
-  color: var(--navy);
+  background: #fff1d8;
+  color: #8a4b17;
 }
 
 .task-badge.high { background: #ffe6e6; color: #b33737; }
@@ -603,9 +603,9 @@ button:hover {
   position: relative;
   height: 180px;
   margin: 16px 0;
-  border: 2px dashed #d7eaf9;
+  border: 2px dashed #c9e6f5;
   border-radius: 14px;
-  background: linear-gradient(180deg, #edf6ff 0%, #f9fbff 100%);
+  background: linear-gradient(180deg, #e7f6ff 0%, #fff8e7 100%);
   overflow: hidden;
 }
 
@@ -614,8 +614,8 @@ button:hover {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--accent) 0%, #78d4ff 100%);
-  box-shadow: 0 10px 20px rgba(80, 181, 255, 0.35);
+  background: linear-gradient(135deg, #f4ae3f 0%, var(--accent) 100%);
+  box-shadow: 0 10px 20px rgba(232, 121, 59, 0.3);
   left: 20px;
   top: 20px;
   transition: left 0.4s ease, top 0.4s ease;
@@ -665,21 +665,15 @@ button:hover {
   }
 }
 
-    min-height:
-        calc(100vh - 125px);
-
-}
-
-
 /* =========================
    SIDEBARS
 ========================= */
 
 .sidebar {
 
-    background: #0b2b4d;
+  background: #fff0e5;
 
-    border: 1px solid #164a70;
+  border: 1px solid #f3dccb;
 
     border-radius: 10px;
 
@@ -691,8 +685,7 @@ button:hover {
 
     gap: 11px;
 
-    box-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 20px rgba(132, 77, 42, 0.12);
 
 }
 
@@ -703,7 +696,7 @@ button:hover {
 
     margin-bottom: 5px;
 
-    color: #73c9f5;
+    color: #a8471d;
 
     font-size: 20px;
 
@@ -712,7 +705,7 @@ button:hover {
 
 .sidebar h3 {
 
-    color: #73c9f5;
+    color: #a8471d;
 
 }
 
@@ -721,7 +714,7 @@ button:hover {
 
     font-size: 14px;
 
-    color: #bde8ff;
+    color: #3d3028;
 
 }
 
@@ -735,13 +728,13 @@ button:hover {
 
     padding: 8px;
 
-    border: 1px solid #3f87b4;
+    border: 1px solid #e7cdb8;
 
     border-radius: 6px;
 
-    background: #f5fbff;
+    background: #fffaf5;
 
-    color: #06203c;
+    color: #3d3028;
 
 }
 
@@ -758,9 +751,9 @@ button:hover {
 
     border-radius: 6px;
 
-    background: #55b9ed;
+    background: #e8793b;
 
-    color: #06203c;
+    color: #ffffff;
 
     font-weight: bold;
 
@@ -773,7 +766,7 @@ button:hover {
 
 .sidebar-button:hover {
 
-    background: #8bd8fa;
+    background: #f09a61;
 
     transform: translateX(3px);
 
@@ -786,7 +779,7 @@ button:hover {
 
     width: 100%;
 
-    background: #286083;
+    background: #f3dccb;
 
     margin: 7px 0;
 
@@ -807,14 +800,14 @@ button:hover {
 
     padding: 7px 0;
 
-    color: #d8f2ff;
+    color: #3d3028;
 
 }
 
 
 .progress-stat strong {
 
-    color: #73c9f5;
+    color: #a8471d;
 
 }
 
