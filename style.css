@@ -1,8 +1,8 @@
 :root {
   --navy: #fff0e5;
   --navy-strong: #ffdfc7;
-  --accent: #e8793b;
-  --accent-dark: #a8471d;
+  --accent: #b84a1b;
+  --accent-dark: #87330f;
   --secondary: #fff7df;
   --text: #3d3028;
   --muted: #76675e;
@@ -67,7 +67,7 @@ select {
   height: 34px;
   border-radius: 50%;
   background: var(--accent);
-  color: var(--navy-strong);
+  color: #ffffff;
   font-weight: 700;
 }
 
@@ -557,7 +557,7 @@ button:hover {
 }
 
 .task-badge.high { background: #ffe6e6; color: #b33737; }
-.task-badge.medium { background: #fff1d6; color: #9d6800; }
+.task-badge.medium { background: #fff1d6; color: #7d5000; }
 .task-badge.low { background: #e5f7ed; color: #1d7d56; }
 
 .task-actions {
@@ -575,7 +575,7 @@ button:hover {
 
 .task-button.delete {
   background: #fce3e3;
-  color: var(--danger);
+  color: #a62e2b;
 }
 
 .task-button.edit {
@@ -820,11 +820,11 @@ button:hover {
 
     overflow: hidden;
 
-    background: #173c5b;
+  background: #e2f1fa;
 
     border-radius: 20px;
 
-    border: 1px solid #286083;
+    border: 1px solid #c9e6f5;
 
 }
 
@@ -835,7 +835,7 @@ button:hover {
 
     height: 100%;
 
-    background: #55b9ed;
+    background: linear-gradient(90deg, #f4c34e 0%, var(--accent) 100%);
 
     border-radius: 20px;
 
@@ -874,7 +874,7 @@ button:hover {
 
     margin: 0;
 
-    color: #73c9f5;
+  color: var(--accent-dark);
 
     font-size: 30px;
 
@@ -885,7 +885,7 @@ button:hover {
 
     margin: 7px 0 0;
 
-    color: #bde8ff;
+  color: var(--muted);
 
 }
 
@@ -912,14 +912,13 @@ button:hover {
 
     padding: 18px;
 
-    background: #0d355c;
+    background: #ffffff;
 
-    border: 1px solid #1b5b84;
+    border: 1px solid #f0dfcf;
 
     border-radius: 10px;
 
-    box-shadow:
-        0 7px 18px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 7px 18px rgba(132, 77, 42, 0.12);
 
     transition:
         transform 0.25s ease,
@@ -941,14 +940,14 @@ button:hover {
 
     margin-top: 5px;
 
-    color: #73c9f5;
+  color: var(--accent-dark);
 
 }
 
 
 .dashboard-card p {
 
-    color: #d2edfc;
+  color: var(--text);
 
     line-height: 1.5;
 
@@ -970,9 +969,9 @@ button:hover {
 
     border-radius: 6px;
 
-    background: #55b9ed;
+    background: var(--accent);
 
-    color: #06203c;
+    color: #ffffff;
 
     font-weight: bold;
 
@@ -983,7 +982,7 @@ button:hover {
 
 .card-button:hover {
 
-    background: #8bd8fa;
+  background: #963b14;
 
 }
 
@@ -1030,7 +1029,7 @@ button:hover {
 
     font-weight: bold;
 
-    color: #73c9f5;
+    color: var(--accent-dark);
 
 }
 
@@ -1056,7 +1055,7 @@ button:hover {
 
     padding: 12px;
 
-    background: #082746;
+  background: linear-gradient(180deg, #e7f6ff 0%, #fff8e7 100%);
 
     border-radius: 7px;
 
@@ -1073,7 +1072,7 @@ button:hover {
 
     font-weight: bold;
 
-    color: #73c9f5;
+    color: var(--accent-dark);
 
     margin: 15px 0;
 
@@ -1107,9 +1106,9 @@ button:hover {
 
     padding: 12px;
 
-    background: #082746;
+    background: #fff5d6;
 
-    border: 1px solid #1b5b84;
+    border: 1px solid #f2e2b8;
 
     border-radius: 7px;
 
@@ -1143,7 +1142,7 @@ button:hover {
 
 .status-message {
 
-    color: #73c9f5;
+  color: var(--accent-dark);
 
     font-weight: bold;
 
