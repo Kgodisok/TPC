@@ -1,23 +1,45 @@
-/**
- * SkillsTrack Learner Support Portal - Landing Page Logic
- *
- * PHASE 2 IMPLEMENTATION
- *
- * This module will handle:
- * - Landing page initialization
- * - Navigation setup
- * - Feature highlights
- * - Call-to-action buttons
- * - Responsive design interactions
- * - Authentication redirects
- *
- * Planning Reference: See ARCHITECTURE.md section 2 for component breakdown
- * Status: PLANNED - Ready for Phase 2 implementation
- */
+const DEFAULT_HIGHLIGHTS = [
+    { key: 'tasks', label: 'Tasks completed', value: 48 },
+    { key: 'sessions', label: 'Support sessions', value: 12 },
+    { key: 'progress', label: 'Progress rate', value: 88 }
+];
 
-// TODO: Initialize landing page
-// TODO: Add navigation handlers
-// TODO: Implement call-to-action buttons
-// TODO: Add scroll animations
-// TODO: Implement responsive behavior
+function getLandingHighlights() {
+    return DEFAULT_HIGHLIGHTS.map((item) => ({ ...item }));
+}
+
+function formatStatValue(value, key = 'tasks') {
+    if (key === 'progress') {
+        return `${Number(value) || 0}%`;
+    }
+
+    return String(value ?? 0);
+}
+
+function initLandingPage({ document: doc } = {}) {
+    if (!doc) {
+        return { highlights: getLandingHighlights(), animated: false };
+    }
+
+    const liveNodes = doc.querySelectorAll('[data-live-stat]');
+    liveNodes.forEach((node) => {
+        const key = node.dataset.liveStat;
+        const matched = DEFAULT_HIGHLIGHTS.find((item) => item.key === key);
+        if (matched) {
+            node.textContent = formatStatValue(matched.value, key);
+        }
+    });
+
+    return {
+        highlights: getLandingHighlights(),
+        animated: liveNodes.length > 0
+    };
+}
+
+module.exports = {
+    DEFAULT_HIGHLIGHTS,
+    getLandingHighlights,
+    formatStatValue,
+    initLandingPage
+};
 

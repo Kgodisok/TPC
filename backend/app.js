@@ -5,6 +5,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const rootDir = path.join(__dirname, '..');
 
+app.use(express.json());
 app.use(express.static(rootDir));
 
 app.get('/', (req, res) => {
@@ -19,10 +20,20 @@ app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(rootDir, 'public', 'dashboard.html'));
 });
 
+app.get('/api/health', (req, res) => {
+    res.json({ ok: true, app: 'SkillsTrack', status: 'healthy' });
+});
+
 app.use((req, res) => {
     res.status(404).send('Page not found');
 });
 
-app.listen(port, () => {
-    console.log(`SkillsTrack is running at http://localhost:${port}`);
-});
+let server;
+
+if (require.main === module) {
+    server = app.listen(port, () => {
+        console.log(`SkillsTrack is running at http://localhost:${port}`);
+    });
+}
+
+module.exports = { app, server };

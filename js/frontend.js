@@ -377,38 +377,104 @@ function handleBookingSubmit(event) {
 
 function setupGame() {
     const gameArea = document.getElementById('gameArea');
-    const gameTarget = document.getElementById('gameTarget');
     const scoreNode = document.getElementById('gameScore');
     const startButton = document.getElementById('startGame');
+    const gamePrompt = document.getElementById('gamePrompt');
+    const gameOptions = document.getElementById('gameOptions');
+    const gameFeedback = document.getElementById('gameFeedback');
 
-    if (!gameArea || !gameTarget || !scoreNode || !startButton) return;
+    if (!gameArea || !scoreNode || !startButton || !gamePrompt || !gameOptions || !gameFeedback) return;
+
+    const questions = [
+        {
+            question: 'A learner has a project due today, a short quiz due tomorrow, and a support booking request. Which should they deal with first?',
+            options: [
+                { text: 'The project due today, then the quiz, then the booking request.', correct: true, explanation: 'Urgent deadlines should be handled first, then the next important task, and support can be booked once the immediate work is under control.' },
+                { text: 'Book the support session first and ignore the project.', correct: false, explanation: 'Support is useful, but it should not replace urgent deadlines that affect submission.' },
+                { text: 'Do the easiest task first and hope the rest sorts itself out.', correct: false, explanation: 'Starting with the easiest task often delays the most important work.' },
+                { text: 'Leave everything until the due date and panic later.', correct: false, explanation: 'Procrastination increases stress and makes the workload harder to manage.' }
+            ]
+        },
+        {
+            question: 'A learner is behind on tasks and feels overwhelmed. What is the best next step?',
+            options: [
+                { text: 'Break the work into smaller steps and start with one achievable task.', correct: true, explanation: 'Chunking work into manageable steps reduces overwhelm and makes progress visible.' },
+                { text: 'Skip the task list and start a completely new activity.', correct: false, explanation: 'New work without a plan adds more confusion and keeps the learner off track.' },
+                { text: 'Complete every task at once without planning.', correct: false, explanation: 'Trying to do everything at once usually leads to errors and missed deadlines.' },
+                { text: 'Cancel everything and take a full week off.', correct: false, explanation: 'Rest is useful, but a plan is still needed to recover progress.' }
+            ]
+        },
+        {
+            question: 'When is it most useful to book a support session?',
+            options: [
+                { text: 'When you have already identified the exact problem and want guided help.', correct: true, explanation: 'Support is most effective when the learner knows what they need help with and wants actionable advice.' },
+                { text: 'Only after the deadline has passed.', correct: false, explanation: 'Waiting until after a deadline makes the support too late to help prevent problems.' },
+                { text: 'Right before every task begins, regardless of need.', correct: false, explanation: 'Booking support without a clear need wastes time and can distract from the real goal.' },
+                { text: 'When you have no tasks left to do.', correct: false, explanation: 'Support is most valuable when it helps solve a current challenge, not after the work is finished.' }
+            ]
+        }
+    ];
 
     let score = 0;
-    let timer = null;
+    let currentIndex = 0;
 
-    const moveTarget = () => {
-        const maxX = gameArea.clientWidth - gameTarget.clientWidth;
-        const maxY = gameArea.clientHeight - gameTarget.clientHeight;
-        const nextX = Math.random() * maxX;
-        const nextY = Math.random() * maxY;
-        gameTarget.style.left = `${nextX}px`;
-        gameTarget.style.top = `${nextY}px`;
-    };
+    function showQuestion() {
+        if (currentIndex >= questions.length) {
+            const total = questions.length;
+            const message = score === total
+                ? 'Excellent work. You understand how to prioritise learning tasks and use support effectively.'
+                : score >= 2
+                    ? 'Good job. You are thinking strategically about deadlines and support.'
+                    : 'Keep practising. Focus on task urgency, small steps, and asking for support early.';
+
+            gamePrompt.textContent = `${message} Final score: ${score}/${total}`;
+            gameOptions.innerHTML = '';
+            gameFeedback.textContent = 'Challenge complete. Press Start challenge to play again.';
+            gameFeedback.className = 'game-feedback';
+            return;
+        }
+
+        const current = questions[currentIndex];
+        gamePrompt.textContent = current.question;
+        gameOptions.innerHTML = '';
+        gameFeedback.textContent = '';
+        gameFeedback.className = 'game-feedback';
+
+        current.options.forEach((option) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'secondary-button full-width';
+            button.textContent = option.text;
+
+            button.addEventListener('click', () => {
+                const isCorrect = option.correct;
+                score += isCorrect ? 1 : 0;
+                scoreNode.textContent = String(score);
+
+                gameFeedback.textContent = isCorrect
+                    ? `Correct! ${option.explanation}`
+                    : `Not quite. ${current.options.find((item) => item.correct).explanation}`;
+                gameFeedback.className = `game-feedback ${isCorrect ? 'success' : 'error'}`;
+
+                Array.from(gameOptions.children).forEach((child) => {
+                    child.disabled = true;
+                });
+
+                setTimeout(() => {
+                    currentIndex += 1;
+                    showQuestion();
+                }, 1200);
+            });
+
+            gameOptions.appendChild(button);
+        });
+    }
 
     startButton.addEventListener('click', () => {
-        if (timer) {
-            clearInterval(timer);
-        }
         score = 0;
+        currentIndex = 0;
         scoreNode.textContent = '0';
-        moveTarget();
-        timer = setInterval(moveTarget, 900);
-    });
-
-    gameTarget.addEventListener('click', () => {
-        score += 1;
-        scoreNode.textContent = String(score);
-        moveTarget();
+        showQuestion();
     });
 }
 

@@ -132,10 +132,12 @@
 
       <aside class="sidebar-panel right-panel">
         <div class="game-card">
-          <h2>Quick challenge</h2>
-          <button id="startGame" class="primary-button full-width" type="button">Start game</button>
-          <div id="gameArea" class="game-area" aria-label="Mini game area">
-            <div id="gameTarget" class="game-target"></div>
+          <h2>Learning challenge</h2>
+          <button id="startGame" class="primary-button full-width" type="button">Start challenge</button>
+          <div id="gameArea" class="game-area" aria-live="polite" aria-label="Educational challenge area">
+            <p id="gamePrompt" class="game-prompt">Press Start challenge to begin.</p>
+            <div id="gameOptions" class="game-options"></div>
+            <p id="gameFeedback" class="game-feedback"></p>
           </div>
           <p class="game-score">Score: <strong id="gameScore">0</strong></p>
         </div>
@@ -147,6 +149,6 @@
       </aside>
     </main>
 
-    <script src="../js/app.js"></script>
+    <script src="../js/frontend.js"></script>
   </body>
 </html>

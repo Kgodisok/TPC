@@ -1,6 +1,10 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { User, Task, Booking, calculateProgress } = require('../backend/models');
+const { validatePassword, registerUser, loginUser, validateSession } = require('../backend/auth');
+const { normalizeTask, createTask, updateTask, deleteTask } = require('../backend/database');
+const { firebaseApp, auth, database } = require('../backend/firebase');
+const { getLandingHighlights, formatStatValue } = require('../backend/landingPage');
 
 test('a user owns tasks with the matching user ID', () => {
     const user = new User('user-1', 'Learner', 'learner@example.com');
@@ -79,5 +83,57 @@ test('bookings track confirmation lifecycle state', () => {
     assert.equal(booking.status, 'Completed');
     booking.cancel();
     assert.equal(booking.status, 'Cancelled');
+});
+
+test('password validation enforces minimum strength requirements', () => {
+    assert.equal(validatePassword('short'), false);
+    assert.equal(validatePassword('ValidPass123'), true);
+});
+
+test('auth registration and login produce a valid session', () => {
+    const user = registerUser({
+        displayName: 'Taylor',
+        email: 'taylor@example.com',
+        password: 'ValidPass123'
+    });
+
+    assert.equal(user.email, 'taylor@example.com');
+    const session = loginUser({ email: 'taylor@example.com', password: 'ValidPass123' });
+    assert.ok(session && session.userId === user.id);
+    assert.equal(validateSession(session.sessionId), true);
+});
+
+test('database helpers normalize and update tasks', () => {
+    const task = normalizeTask({
+        title: 'Review report',
+        dueDate: '2026-10-10',
+        userId: 'user-1',
+        description: 'Prepare notes',
+        priority: 'high'
+    });
+
+    assert.equal(task.priority, 'High');
+    assert.equal(task.status, 'Pending');
+
+    const saved = createTask(task);
+    const updated = updateTask(saved.id, { status: 'Completed', completed: true });
+    assert.equal(updated.status, 'Completed');
+
+    const removed = deleteTask(saved.id);
+    assert.equal(removed, true);
+});
+
+test('firebase config exposes initialized services', () => {
+    assert.ok(firebaseApp);
+    assert.ok(auth);
+    assert.ok(database);
+});
+
+test('landing page stats are shaped for display', () => {
+    const highlights = getLandingHighlights();
+    const value = formatStatValue(88, 'progress');
+
+    assert.ok(Array.isArray(highlights));
+    assert.equal(value, '88%');
 });
 

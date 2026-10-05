@@ -1,30 +1,99 @@
-/**
- * SkillsTrack Learner Support Portal - Authentication Module
- *
- * PHASE 2 IMPLEMENTATION
- *
- * This module will handle:
- * - User registration (create account)
- * - User login (authenticate)
- * - Session management
- * - Password validation
- * - Email verification (Phase 2+)
- * - Password reset (Phase 2+)
- *
- * Planning Reference: See README.md User Stories 1-2 for requirements
- * Planning Reference: See ARCHITECTURE.md section 4 for Firebase auth rules
- * Status: PLANNED - Ready for Phase 2 implementation
- *
- * Security Considerations:
- * - Phase 1: localStorage only (development)
- * - Phase 2: Firebase Authentication (production)
- * - Passwords must be hashed (use Firebase Auth)
- * - No passwords stored in localStorage (production)
- */
+const crypto = require('node:crypto');
 
-// TODO: Implement registration function
-// TODO: Implement login function
-// TODO: Implement logout function
-// TODO: Implement session validation
-// TODO: Add password validation rules
-// TODO: Add error handling
+const users = new Map();
+const sessions = new Map();
+
+function hashPassword(password) {
+    return crypto.createHash('sha256').update(String(password)).digest('hex');
+}
+
+function normalizeEmail(email) {
+    return String(email || '').trim().toLowerCase();
+}
+
+function validatePassword(password) {
+    if (typeof password !== 'string') {
+        return false;
+    }
+
+    return password.length >= 8 && /[A-Z]/.test(password) && /\d/.test(password);
+}
+
+function registerUser({ displayName, email, password }) {
+    const normalizedEmail = normalizeEmail(email);
+    const name = String(displayName || '').trim();
+
+    if (!name) {
+        throw new Error('Display name is required.');
+    }
+
+    if (!normalizedEmail || !normalizedEmail.includes('@')) {
+        throw new Error('A valid email address is required.');
+    }
+
+    if (!validatePassword(password)) {
+        throw new Error('Password must be at least 8 characters and contain a capital letter and a number.');
+    }
+
+    if (users.has(normalizedEmail)) {
+        throw new Error('An account with this email already exists.');
+    }
+
+    const user = {
+        id: `user-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+        displayName: name,
+        email: normalizedEmail,
+        passwordHash: hashPassword(password)
+    };
+
+    users.set(normalizedEmail, user);
+    return { ...user, password: undefined };
+}
+
+function loginUser({ email, password }) {
+    const normalizedEmail = normalizeEmail(email);
+    const user = users.get(normalizedEmail);
+
+    if (!user) {
+        throw new Error('User not found.');
+    }
+
+    if (user.passwordHash !== hashPassword(password)) {
+        throw new Error('Incorrect password.');
+    }
+
+    const sessionId = `session-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+    const session = {
+        sessionId,
+        userId: user.id,
+        email: user.email,
+        displayName: user.displayName
+    };
+
+    sessions.set(sessionId, session);
+    return session;
+}
+
+function validateSession(sessionId) {
+    return sessions.has(sessionId);
+}
+
+function logoutUser(sessionId) {
+    if (!sessionId) {
+        return false;
+    }
+
+    return sessions.delete(sessionId);
+}
+
+module.exports = {
+    users,
+    sessions,
+    hashPassword,
+    normalizeEmail,
+    validatePassword,
+    registerUser,
+    loginUser,
+    validateSession,
+    logoutUser
+};
