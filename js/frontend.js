@@ -177,6 +177,11 @@ function handleRegisterSubmit(event) {
         return;
     }
 
+    if (typeof name !== 'string' || /\d/.test(name)) {
+        setAuthMessage('Your name must be text and must not contain numbers.', 'error');
+        return;
+    }
+
     const auth = getAuthClient();
     if (auth) {
         auth.createUserWithEmailAndPassword(email, password)

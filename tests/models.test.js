@@ -104,6 +104,19 @@ test('auth registration and login produce a valid session', () => {
     assert.equal(validateSession(session.sessionId), true);
 });
 
+test('auth registration rejects names that are not strings or contain numbers', () => {
+    assert.throws(() => registerUser({
+        displayName: 123,
+        email: 'numeric.type@example.com',
+        password: 'ValidPass123'
+    }), /Display name is required/);
+    assert.throws(() => registerUser({
+        displayName: 'Taylor2',
+        email: 'numeric.name@example.com',
+        password: 'ValidPass123'
+    }), /must not contain numbers/);
+});
+
 test('database helpers normalize and update tasks', () => {
     const task = normalizeTask({
         title: 'Review report',

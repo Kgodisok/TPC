@@ -21,10 +21,14 @@ function validatePassword(password) {
 
 function registerUser({ displayName, email, password }) {
     const normalizedEmail = normalizeEmail(email);
-    const name = String(displayName || '').trim();
+    const name = typeof displayName === 'string' ? displayName.trim() : '';
 
     if (!name) {
         throw new Error('Display name is required.');
+    }
+
+    if (/\d/.test(name)) {
+        throw new Error('Display name must not contain numbers.');
     }
 
     if (!normalizedEmail || !normalizedEmail.includes('@')) {
