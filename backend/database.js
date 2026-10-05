@@ -100,6 +100,10 @@ function normalizeBooking(input = {}) {
     };
 }
 
+function listBookings() {
+    return bookingStore.map((booking) => ({ ...booking }));
+}
+
 function createBooking(bookingInput = {}) {
     const booking = normalizeBooking(bookingInput);
     bookingStore.push(booking);
@@ -141,6 +145,7 @@ module.exports = {
     updateTask,
     deleteTask,
     normalizeBooking,
+    listBookings,
     createBooking,
     updateBooking,
     deleteBooking

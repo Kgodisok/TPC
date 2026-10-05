@@ -5,6 +5,7 @@ const { validatePassword, registerUser, loginUser, validateSession } = require('
 const { normalizeTask, createTask, updateTask, deleteTask } = require('../backend/database');
 const { firebaseApp, auth, database } = require('../backend/firebase');
 const { getLandingHighlights, formatStatValue } = require('../backend/landingPage');
+const { app } = require('../backend/app');
 
 test('a user owns tasks with the matching user ID', () => {
     const user = new User('user-1', 'Learner', 'learner@example.com');
@@ -135,5 +136,43 @@ test('landing page stats are shaped for display', () => {
 
     assert.ok(Array.isArray(highlights));
     assert.equal(value, '88%');
+});
+
+test('server exposes auth and task API routes', async () => {
+    const server = app.listen(0);
+
+    try {
+        const authResponse = await fetch(`http://127.0.0.1:${server.address().port}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                displayName: 'API Tester',
+                email: 'api.tester@example.com',
+                password: 'StrongPass123'
+            })
+        });
+
+        assert.equal(authResponse.status, 201);
+        const authBody = await authResponse.json();
+        assert.equal(authBody.user.email, 'api.tester@example.com');
+
+        const taskResponse = await fetch(`http://127.0.0.1:${server.address().port}/api/tasks`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: 'Build API flow',
+                dueDate: '2026-10-20',
+                userId: 'api-user',
+                description: 'Complete the server route',
+                priority: 'High'
+            })
+        });
+
+        assert.equal(taskResponse.status, 201);
+        const taskBody = await taskResponse.json();
+        assert.equal(taskBody.task.title, 'Build API flow');
+    } finally {
+        await new Promise((resolve) => server.close(resolve));
+    }
 });
 
