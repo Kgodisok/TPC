@@ -744,6 +744,185 @@ button:hover {
   margin-bottom: 20px;
 }
 
+.assessor-shell {
+  display: grid;
+  gap: 22px;
+  width: min(100% - 40px, 1240px);
+  margin: 32px auto 60px;
+}
+
+.assessor-heading h1,
+.assessor-panel h2 {
+  margin: 0 0 8px;
+}
+
+.assessor-heading p,
+.assessor-panel > p {
+  color: var(--muted);
+}
+
+.assessor-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.assessor-stat {
+  padding: 18px;
+  border: 1px solid #f0dfcf;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.assessor-stat span,
+.assessor-stat strong {
+  display: block;
+}
+
+.assessor-stat span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.assessor-stat strong {
+  margin-top: 8px;
+  font-size: 1.8rem;
+}
+
+.assessor-panel {
+  min-width: 0;
+  padding: 22px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.assessor-panel-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.assessor-panel-heading input {
+  width: min(100%, 320px);
+}
+
+.assessor-table-wrap {
+  overflow-x: auto;
+}
+
+.assessor-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.assessor-table th,
+.assessor-table td {
+  padding: 13px 10px;
+  border-bottom: 1px solid #eee5df;
+  vertical-align: middle;
+}
+
+.assessor-table th {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.assessor-panel .task-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.assessor-progress-track {
+  width: min(100%, 160px);
+  height: 8px;
+  margin-bottom: 5px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #ece8e5;
+}
+
+.assessor-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--success);
+}
+
+.assessor-task-form {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #eee5df;
+}
+
+.assessor-task-form h3 {
+  margin-top: 0;
+}
+
+.assessor-task-form label {
+  display: block;
+  margin: 12px 0 7px;
+  font-weight: 700;
+}
+
+.assessor-task-form input,
+.assessor-task-form select,
+.assessor-task-form textarea,
+.assessor-panel-heading input {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid #d9e7f4;
+  border-radius: 8px;
+  background: #fffdfa;
+  color: var(--text);
+}
+
+.assessor-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.assessor-task-form .primary-button {
+  margin-top: 16px;
+}
+
+.pending-shell {
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 100px);
+  padding: 32px 20px;
+}
+
+.pending-panel {
+  width: min(100%, 620px);
+  padding: 30px;
+  border: 1px solid #f0dfcf;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.pending-panel h1 {
+  margin-top: 0;
+}
+
+.pending-panel p {
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.pending-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
 @media print {
   .print-exclude {
     display: none !important;
@@ -753,6 +932,10 @@ button:hover {
 @media (max-width: 980px) {
   .dashboard-shell {
     grid-template-columns: 1fr;
+  }
+
+  .assessor-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .feature-grid {
@@ -772,7 +955,12 @@ button:hover {
 
   .feature-grid,
   .summary-strip,
-  .two-column {
+  .two-column,
+  .assessor-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .assessor-panel .task-card {
     grid-template-columns: 1fr;
   }
 

@@ -2,12 +2,17 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Profiles contain personally identifiable information and are private.
-    // users/{uid}: displayName, email, role, createdAt, updatedAt.
-    // users/{uid}/tasks/{taskId}: title, dueDate, priority, status,
-    // description, completed, createdAt, updatedAt.
-    // users/{uid}/bookings/{bookingId}: date, type, notes, status,
-    // createdAt, updatedAt.
+    // Assumed data model:
+    // users/{uid}: private displayName (2-60 chars), email, role
+    // ('learner'|'assessor'), accountStatus ('approved'|'pending'), and
+    // immutable createdAt/updatedAt timestamps. Assessor approval is manual.
+    // learnerDirectory/{uid}: displayName (2-60 chars) and timestamps only;
+    // readable by its learner and approved assessors, with no email address.
+    // users/{uid}/tasks/{taskId}: title (1-120 chars), dueDate (YYYY-MM-DD),
+    // priority ('Low'|'Medium'|'High'), status ('Pending'|'Completed'),
+    // description (0-1000 chars), completed (bool), and timestamps.
+    // users/{uid}/bookings/{bookingId}: date (YYYY-MM-DD), type, notes
+    // (5-500 chars), status ('Pending'), and timestamps.
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -20,6 +25,21 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/users/$(userId));
     }
 
+    function isLearner(userId) {
+      let profilePath = /databases/$(database)/documents/users/$(userId);
+      return exists(profilePath)
+        && get(profilePath).data.role == 'learner'
+        && get(profilePath).data.accountStatus == 'approved';
+    }
+
+    function isApprovedAssessor() {
+      let profilePath = /databases/$(database)/documents/users/$(request.auth.uid);
+      return isAuthenticated()
+        && exists(profilePath)
+        && get(profilePath).data.role == 'assessor'
+        && get(profilePath).data.accountStatus == 'approved';
+    }
+
     function isValidEmail(email) {
       return email is string
         && email.size() <= 254
@@ -27,8 +47,12 @@ service cloud.firestore {
     }
 
     function isValidProfile(data) {
-      return data.keys().hasAll(['displayName', 'email', 'role', 'createdAt', 'updatedAt'])
-        && data.keys().hasOnly(['displayName', 'email', 'role', 'createdAt', 'updatedAt'])
+      return data.keys().hasAll([
+          'displayName', 'email', 'role', 'accountStatus', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'displayName', 'email', 'role', 'accountStatus', 'createdAt', 'updatedAt'
+        ])
         && data.displayName is string
         && data.displayName.size() >= 2
         && data.displayName.size() <= 60
@@ -37,6 +61,18 @@ service cloud.firestore {
         && request.auth.token.email is string
         && data.email == request.auth.token.email
         && data.role in ['learner', 'assessor']
+        && data.accountStatus in ['pending', 'approved']
+        && (data.role == 'assessor' || data.accountStatus == 'approved')
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidLearnerDirectory(data) {
+      return data.keys().hasAll(['displayName', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['displayName', 'createdAt', 'updatedAt'])
+        && data.displayName is string
+        && data.displayName.size() >= 2
+        && data.displayName.size() <= 60
         && data.createdAt is timestamp
         && data.updatedAt is timestamp;
     }
@@ -87,6 +123,10 @@ service cloud.firestore {
       allow read: if isOwner(userId);
       allow create: if isOwner(userId)
         && isValidProfile(request.resource.data)
+        && ((request.resource.data.role == 'learner'
+              && request.resource.data.accountStatus == 'approved')
+          || (request.resource.data.role == 'assessor'
+              && request.resource.data.accountStatus == 'pending'))
         && request.resource.data.createdAt == request.time
         && request.resource.data.updatedAt == request.time;
       allow update: if isOwner(userId)
@@ -95,22 +135,27 @@ service cloud.firestore {
         && (resource.data.keys().hasAny(['role'])
           ? request.resource.data.role == resource.data.role
           : request.resource.data.role == 'learner')
+        && (resource.data.keys().hasAny(['accountStatus'])
+          ? request.resource.data.accountStatus == resource.data.accountStatus
+          : (resource.data.keys().hasAny(['role']) && resource.data.role == 'assessor'
+            ? request.resource.data.accountStatus == 'pending'
+            : request.resource.data.accountStatus == 'approved'))
         && request.resource.data.updatedAt == request.time;
       allow delete: if false;
 
       match /tasks/{taskId} {
-        allow read: if isOwner(userId) && hasUserProfile(userId);
-        allow create: if isOwner(userId)
-          && hasUserProfile(userId)
+        allow read: if isApprovedAssessor() || (isOwner(userId) && isLearner(userId));
+        allow create: if isLearner(userId)
+          && (isOwner(userId) || isApprovedAssessor())
           && isValidTask(request.resource.data)
           && request.resource.data.createdAt == request.time
           && request.resource.data.updatedAt == request.time;
-        allow update: if isOwner(userId)
-          && hasUserProfile(userId)
+        allow update: if isLearner(userId)
+          && (isOwner(userId) || isApprovedAssessor())
           && isValidTask(request.resource.data)
           && request.resource.data.createdAt == resource.data.createdAt
           && request.resource.data.updatedAt == request.time;
-        allow delete: if isOwner(userId) && hasUserProfile(userId);
+        allow delete: if isLearner(userId) && (isOwner(userId) || isApprovedAssessor());
       }
 
       match /bookings/{bookingId} {
@@ -123,6 +168,21 @@ service cloud.firestore {
         allow update: if false;
         allow delete: if isOwner(userId) && hasUserProfile(userId);
       }
+    }
+
+    match /learnerDirectory/{userId} {
+      allow read: if isOwner(userId) || isApprovedAssessor();
+      allow create: if isOwner(userId)
+        && isLearner(userId)
+        && isValidLearnerDirectory(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isOwner(userId)
+        && isLearner(userId)
+        && isValidLearnerDirectory(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
     }
   }
 }

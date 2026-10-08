@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SkillsTrack | Assessor Approval</title>
+    <link rel="stylesheet" href="../style.css?v=assessor-1" />
+  </head>
+  <body data-page="assessor-pending" aria-busy="true">
+    <div id="pageLoader" class="page-loader" role="status" aria-live="polite" aria-atomic="true">
+      <div class="page-loader-content">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <span id="pageLoaderMessage">Checking assessor approval...</span>
+      </div>
+    </div>
+    <header class="site-header">
+      <div class="brand-block">
+        <span class="brand-mark">S</span>
+        <span>SkillsTrack at StarSchools</span>
+      </div>
+      <button id="logoutButton" class="nav-button danger" type="button">Log out</button>
+    </header>
+    <main class="pending-shell">
+      <section class="pending-panel">
+        <p class="eyebrow">Assessor account</p>
+        <h1>Approval pending</h1>
+        <p><strong id="pendingAssessorName">Assessor</strong>, your request to access learner records is waiting for StarSchools approval.</p>
+        <p>Student progress and task controls will become available after an administrator approves your account.</p>
+        <p id="pendingStatus" class="dashboard-status" aria-live="polite"></p>
+        <div class="pending-actions">
+          <button id="checkApprovalButton" class="primary-button" type="button">Check approval</button>
+          <button id="pendingLogoutButton" class="secondary-button" type="button">Log out</button>
+        </div>
+      </section>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
+    <script src="../js/frontend.js?v=assessor-1"></script>
+  </body>
+</html>

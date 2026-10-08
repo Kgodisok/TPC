@@ -12,6 +12,11 @@ let tasks = [];
 let bookings = [];
 let stopTaskListener = null;
 let stopBookingListener = null;
+let stopAssessorLearnerListener = null;
+let stopAssessorTaskListener = null;
+let assessorLearners = [];
+let assessorTasks = [];
+let selectedAssessorLearnerId = '';
 let redirectAfterSignOut = false;
 let activeLoadingOperations = 0;
 
@@ -166,6 +171,18 @@ function redirectToDashboard() {
     window.location.href = '/public/dashboard.html';
 }
 
+function redirectForAccount(role, accountStatus) {
+    if (role !== 'assessor') {
+        redirectToDashboard();
+        return;
+    }
+
+    const destination = accountStatus === 'approved'
+        ? '/public/assessor-dashboard.html'
+        : '/public/assessor-pending.html';
+    window.location.href = destination;
+}
+
 function isValidDisplayName(name) {
     return name.length >= 2
         && name.length <= 60
@@ -233,10 +250,12 @@ async function handleLoginSubmit(event) {
     }
 
     try {
-        const { role } = await withPageLoading('Signing in to your StarSchools account...', async () => {
+        const { role, accountStatus } = await withPageLoading('Signing in to your StarSchools account...', async () => {
             const credential = await auth.signInWithEmailAndPassword(email, password);
             const profile = await firestore.collection('users').doc(credential.user.uid).get();
-            return { user: credential.user, role: profile.data()?.role || 'learner' };
+            const role = profile.data()?.role || 'learner';
+            const accountStatus = profile.data()?.accountStatus || (role === 'assessor' ? 'pending' : 'approved');
+            return { role, accountStatus };
         });
 
         if (selectedRole !== role) {
@@ -246,8 +265,11 @@ async function handleLoginSubmit(event) {
             return;
         }
 
-        setAuthMessage('Sign-in successful. Opening your StarSchools dashboard...', 'success');
-        setTimeout(() => redirectToDashboard(), 1200);
+        const message = role === 'assessor' && accountStatus !== 'approved'
+            ? 'Your assessor account is awaiting StarSchools approval.'
+            : 'Sign-in successful. Opening your StarSchools dashboard...';
+        setAuthMessage(message, 'success');
+        setTimeout(() => redirectForAccount(role, accountStatus), 900);
     } catch (error) {
         if (auth.currentUser) await auth.signOut();
         setAuthMessage(describeFirebaseError(error, 'sign in'), 'error');
@@ -302,13 +324,21 @@ async function handleRegisterSubmit(event) {
                 displayName: name,
                 email: user.email,
                 role,
+                accountStatus: role === 'assessor' ? 'pending' : 'approved',
                 createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
                 updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
             });
+            if (role === 'learner') {
+                await ensureLearnerDirectory(user, name);
+            }
         });
 
-        setAuthMessage('Your StarSchools account was created successfully. Opening your dashboard...', 'success');
-        setTimeout(() => redirectToDashboard(), 1200);
+        const accountStatus = role === 'assessor' ? 'pending' : 'approved';
+        const message = role === 'assessor'
+            ? 'Your assessor account was created. StarSchools approval is required before student records are available.'
+            : 'Your StarSchools account was created successfully. Opening your dashboard...';
+        setAuthMessage(message, 'success');
+        setTimeout(() => redirectForAccount(role, accountStatus), 900);
     } catch (error) {
         setAuthMessage(describeFirebaseError(error, 'create your account'), 'error');
     }
@@ -330,26 +360,51 @@ async function ensureUserProfile(user) {
     const displayName = user.displayName || profile.displayName || 'Learner';
     const email = user.email || profile.email || '';
     const role = profile.role || 'learner';
+    const accountStatus = profile.accountStatus || (role === 'assessor' ? 'pending' : 'approved');
 
     if (!profileSnapshot.exists) {
         await profileRef.set({
             displayName,
             email,
             role,
+            accountStatus,
             createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
             updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         });
+    } else {
+        const updates = {};
+        if (profile.displayName !== displayName) updates.displayName = displayName;
+        if (profile.email !== email) updates.email = email;
+        if (!profile.role) updates.role = role;
+        if (!profile.accountStatus) updates.accountStatus = accountStatus;
+        if (Object.keys(updates).length) {
+            updates.updatedAt = window.firebase.firestore.FieldValue.serverTimestamp();
+            await profileRef.update(updates);
+        }
+    }
+
+    if (role === 'learner') {
+        await ensureLearnerDirectory(user, displayName);
+    }
+
+    return { role, accountStatus, displayName };
+}
+
+async function ensureLearnerDirectory(user, displayName) {
+    const directoryRef = window.firestoreDb.collection('learnerDirectory').doc(user.uid);
+    const directorySnapshot = await directoryRef.get();
+    const directoryData = {
+        displayName,
+        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (directorySnapshot.exists) {
+        await directoryRef.update(directoryData);
         return;
     }
 
-    const updates = {};
-    if (profile.displayName !== displayName) updates.displayName = displayName;
-    if (profile.email !== email) updates.email = email;
-    if (!profile.role) updates.role = role;
-    if (Object.keys(updates).length) {
-        updates.updatedAt = window.firebase.firestore.FieldValue.serverTimestamp();
-        await profileRef.update(updates);
-    }
+    directoryData.createdAt = window.firebase.firestore.FieldValue.serverTimestamp();
+    await directoryRef.set(directoryData);
 }
 
 function renderDashboard() {
@@ -617,6 +672,305 @@ function renderBookings() {
         });
 }
 
+function showAssessorMessage(message, type = 'error') {
+    const node = document.getElementById('assessorStatus');
+    if (!node) return;
+    node.textContent = message;
+    node.className = `dashboard-status ${type}`;
+}
+
+function getAssessorProgress(learnerId) {
+    return calculateProgress(assessorTasks.filter((task) => task.userId === learnerId));
+}
+
+function renderAssessorDashboard() {
+    const totalTasks = assessorTasks.length;
+    const completedTasks = assessorTasks.filter((task) => task.completed || task.status === 'Completed').length;
+    const learnerCount = document.getElementById('assessorLearnerCount');
+    const taskCount = document.getElementById('assessorTaskCount');
+    const completedCount = document.getElementById('assessorCompletedCount');
+    const outstandingCount = document.getElementById('assessorOutstandingCount');
+    if (learnerCount) learnerCount.textContent = String(assessorLearners.length);
+    if (taskCount) taskCount.textContent = String(totalTasks);
+    if (completedCount) completedCount.textContent = String(completedTasks);
+    if (outstandingCount) outstandingCount.textContent = String(totalTasks - completedTasks);
+
+    const search = document.getElementById('assessorLearnerSearch')?.value.trim().toLowerCase() || '';
+    const learnerTable = document.getElementById('assessorLearnerTable');
+    if (learnerTable) {
+        const visibleLearners = assessorLearners.filter((learner) => learner.displayName.toLowerCase().includes(search));
+        learnerTable.innerHTML = visibleLearners.length
+            ? visibleLearners.map((learner) => {
+                const progress = getAssessorProgress(learner.id);
+                return `
+                    <tr>
+                      <td>${escapeHtml(learner.displayName)}</td>
+                      <td>${progress.total}</td>
+                      <td>${progress.completed}</td>
+                      <td>
+                        <div class="assessor-progress-track" aria-label="${progress.percentage}% complete">
+                          <span style="width: ${progress.percentage}%"></span>
+                        </div>
+                        <strong>${progress.percentage}%</strong>
+                      </td>
+                      <td><button class="task-button edit" type="button" data-assessor-view="${escapeHtml(learner.id)}">View tasks</button></td>
+                    </tr>
+                `;
+            }).join('')
+            : '<tr><td colspan="5">No learners found.</td></tr>';
+    }
+
+    const learnerSelect = document.getElementById('assessorTaskLearner');
+    if (learnerSelect) {
+        const previousValue = learnerSelect.value;
+        learnerSelect.innerHTML = '<option value="">Select a learner</option>' + assessorLearners.map((learner) => (
+            `<option value="${escapeHtml(learner.id)}">${escapeHtml(learner.displayName)}</option>`
+        )).join('');
+        learnerSelect.value = assessorLearners.some((learner) => learner.id === previousValue)
+            ? previousValue
+            : '';
+    }
+
+    renderAssessorTasks();
+}
+
+function renderAssessorTasks() {
+    const selectedLearner = assessorLearners.find((learner) => learner.id === selectedAssessorLearnerId);
+    const learnerName = document.getElementById('selectedAssessorLearnerName');
+    const taskList = document.getElementById('assessorTaskList');
+    if (learnerName) learnerName.textContent = selectedLearner?.displayName || 'Select a learner';
+    if (!taskList) return;
+
+    if (!selectedLearner) {
+        taskList.innerHTML = '<p class="empty-state">Choose a learner to review their tasks.</p>';
+        return;
+    }
+
+    const learnerTasks = assessorTasks.filter((task) => task.userId === selectedLearner.id);
+    if (!learnerTasks.length) {
+        taskList.innerHTML = '<p class="empty-state">This learner has no tasks yet. You can assign one below.</p>';
+        return;
+    }
+
+    taskList.innerHTML = learnerTasks.map((task) => {
+        const isComplete = task.completed || task.status === 'Completed';
+        return `
+            <article class="task-card ${isComplete ? 'completed' : ''}">
+              <div class="task-info">
+                <h3>${escapeHtml(task.title)}</h3>
+                <div class="task-meta">
+                  <span>Due ${escapeHtml(task.dueDate)}</span>
+                  <span class="task-badge ${escapeHtml(task.priority.toLowerCase())}">${escapeHtml(task.priority)}</span>
+                  <span>${isComplete ? 'Completed' : 'Outstanding'}</span>
+                </div>
+                <p>${escapeHtml(task.description || 'No description provided.')}</p>
+              </div>
+              <div class="task-actions">
+                <button class="task-button edit" type="button" data-assessor-task-action="toggle" data-task-id="${escapeHtml(task.id)}">${isComplete ? 'Reopen task' : 'Mark complete'}</button>
+                <button class="task-button delete" type="button" data-assessor-task-action="delete" data-task-id="${escapeHtml(task.id)}">Delete</button>
+              </div>
+            </article>
+        `;
+    }).join('');
+}
+
+function listenToAssessorData() {
+    if (stopAssessorLearnerListener) stopAssessorLearnerListener();
+    if (stopAssessorTaskListener) stopAssessorTaskListener();
+
+    let learnersLoaded = false;
+    let tasksLoaded = false;
+    const finishLoading = () => {
+        if (learnersLoaded && tasksLoaded) setPageLoading(false);
+    };
+
+    stopAssessorLearnerListener = window.firestoreDb.collection('learnerDirectory').onSnapshot((snapshot) => {
+        assessorLearners = snapshot.docs.map((document) => ({ id: document.id, ...document.data() }))
+            .sort((left, right) => left.displayName.localeCompare(right.displayName));
+        if (!assessorLearners.some((learner) => learner.id === selectedAssessorLearnerId)) {
+            selectedAssessorLearnerId = '';
+        }
+        renderAssessorDashboard();
+        learnersLoaded = true;
+        finishLoading();
+    }, (error) => {
+        showAssessorMessage(describeFirebaseError(error, 'load learners'));
+        learnersLoaded = true;
+        finishLoading();
+    });
+
+    stopAssessorTaskListener = window.firestoreDb.collectionGroup('tasks').onSnapshot((snapshot) => {
+        assessorTasks = snapshot.docs.map((document) => ({
+            ...document.data(),
+            id: document.id,
+            userId: document.ref.parent.parent.id
+        }));
+        renderAssessorDashboard();
+        tasksLoaded = true;
+        finishLoading();
+    }, (error) => {
+        showAssessorMessage(describeFirebaseError(error, 'load learner tasks'));
+        tasksLoaded = true;
+        finishLoading();
+    });
+}
+
+async function handleAssessorTaskSubmit(event) {
+    event.preventDefault();
+    const learnerId = document.getElementById('assessorTaskLearner').value;
+    const title = document.getElementById('assessorTaskTitle').value.trim();
+    const dueDate = document.getElementById('assessorTaskDueDate').value;
+    const priority = document.getElementById('assessorTaskPriority').value;
+    const description = document.getElementById('assessorTaskDescription').value.trim();
+
+    if (!learnerId || !title || title.length > 120 || !dueDate || description.length > 1000) {
+        showAssessorMessage('Select a learner, add a title and due date, and keep descriptions under 1,000 characters.');
+        return;
+    }
+
+    try {
+        await withPageLoading('Assigning learner task...', () => window.firestoreDb
+            .collection('users').doc(learnerId).collection('tasks').add({
+                title,
+                dueDate,
+                priority,
+                status: 'Pending',
+                description,
+                completed: false,
+                createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+            }));
+        showAssessorMessage('Task assigned successfully.', 'success');
+        event.target.reset();
+    } catch (error) {
+        showAssessorMessage(describeFirebaseError(error, 'assign the task'));
+    }
+}
+
+async function handleAssessorTaskAction(event) {
+    const button = event.target.closest('button[data-assessor-task-action]');
+    if (!button) return;
+
+    const task = assessorTasks.find((item) => item.id === button.dataset.taskId && item.userId === selectedAssessorLearnerId);
+    if (!task) return;
+
+    const taskRef = window.firestoreDb.collection('users').doc(task.userId).collection('tasks').doc(task.id);
+    try {
+        if (button.dataset.assessorTaskAction === 'delete') {
+            if (!window.confirm('Permanently delete this learner task?')) return;
+            await withPageLoading('Deleting learner task...', () => taskRef.delete());
+            showAssessorMessage('Task deleted.', 'success');
+            return;
+        }
+
+        const completed = !(task.completed || task.status === 'Completed');
+        await withPageLoading('Updating learner task...', () => taskRef.update({
+            completed,
+            status: completed ? 'Completed' : 'Pending',
+            updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        }));
+        showAssessorMessage(completed ? 'Task marked complete.' : 'Task reopened.', 'success');
+    } catch (error) {
+        showAssessorMessage(describeFirebaseError(error, 'update the learner task'));
+    }
+}
+
+function attachAssessorDashboardEvents() {
+    document.getElementById('logoutButton')?.addEventListener('click', handleLogout);
+    document.getElementById('assessorLearnerSearch')?.addEventListener('input', renderAssessorDashboard);
+    document.getElementById('assessorLearnerTable')?.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-assessor-view]');
+        if (!button) return;
+        selectedAssessorLearnerId = button.dataset.assessorView;
+        const learnerSelect = document.getElementById('assessorTaskLearner');
+        if (learnerSelect) learnerSelect.value = selectedAssessorLearnerId;
+        renderAssessorTasks();
+        document.getElementById('assessorTaskPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    document.getElementById('assessorTaskLearner')?.addEventListener('change', (event) => {
+        selectedAssessorLearnerId = event.target.value;
+        renderAssessorTasks();
+    });
+    document.getElementById('assessorTaskForm')?.addEventListener('submit', handleAssessorTaskSubmit);
+    document.getElementById('assessorTaskList')?.addEventListener('click', handleAssessorTaskAction);
+}
+
+function initializeAssessorDashboard() {
+    const auth = getAuthClient();
+    if (!auth || !window.firestoreDb) {
+        setPageLoading(false);
+        return;
+    }
+
+    attachAssessorDashboardEvents();
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.replace('/public/login.html');
+            return;
+        }
+
+        currentUser = user;
+        try {
+            const profile = await ensureUserProfile(user);
+            if (profile.role !== 'assessor') {
+                window.location.replace('/public/dashboard.html');
+                return;
+            }
+            if (profile.accountStatus !== 'approved') {
+                window.location.replace('/public/assessor-pending.html');
+                return;
+            }
+
+            const welcomeName = document.getElementById('assessorWelcomeName');
+            if (welcomeName) welcomeName.textContent = profile.displayName;
+            setPageLoading(true, 'Loading learner progress...');
+            listenToAssessorData();
+        } catch (error) {
+            setPageLoading(false);
+            showAssessorMessage(describeFirebaseError(error, 'load the assessor dashboard'));
+        }
+    });
+}
+
+function initializeAssessorPending() {
+    const auth = getAuthClient();
+    if (!auth || !window.firestoreDb) {
+        setPageLoading(false);
+        return;
+    }
+
+    document.getElementById('logoutButton')?.addEventListener('click', handleLogout);
+    document.getElementById('pendingLogoutButton')?.addEventListener('click', handleLogout);
+    document.getElementById('checkApprovalButton')?.addEventListener('click', () => window.location.reload());
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.replace('/public/login.html');
+            return;
+        }
+
+        currentUser = user;
+        try {
+            const profile = await ensureUserProfile(user);
+            if (profile.role !== 'assessor') {
+                window.location.replace('/public/dashboard.html');
+                return;
+            }
+            if (profile.accountStatus === 'approved') {
+                window.location.replace('/public/assessor-dashboard.html');
+                return;
+            }
+
+            const name = document.getElementById('pendingAssessorName');
+            if (name) name.textContent = profile.displayName;
+            setPageLoading(false);
+        } catch (error) {
+            setPageLoading(false);
+            const status = document.getElementById('pendingStatus');
+            if (status) status.textContent = describeFirebaseError(error, 'check assessor approval');
+        }
+    });
+}
+
 async function handleBookingAction(event) {
     const button = event.target.closest('button[data-booking-id]');
     if (!button || !window.confirm('Cancel this support request?')) return;
@@ -841,7 +1195,13 @@ function initializeDashboard() {
         currentUser = user;
         try {
             await withPageLoading('Loading your learner portal...', async () => {
-                await ensureUserProfile(user);
+                const profile = await ensureUserProfile(user);
+                if (profile.role === 'assessor') {
+                    window.location.replace(profile.accountStatus === 'approved'
+                        ? '/public/assessor-dashboard.html'
+                        : '/public/assessor-pending.html');
+                    return;
+                }
                 await listenToUserData();
             });
         } catch (error) {
@@ -859,13 +1219,22 @@ function initializeGame() {
 
     setupGame();
     document.getElementById('logoutButton')?.addEventListener('click', handleLogout);
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged(async (user) => {
         if (!user) {
             window.location.replace('/public/login.html');
             return;
         }
 
-        setPageLoading(false);
+        try {
+            const profile = await ensureUserProfile(user);
+            if (profile.role === 'assessor') {
+                redirectForAccount(profile.role, profile.accountStatus);
+                return;
+            }
+            setPageLoading(false);
+        } catch (error) {
+            setPageLoading(false);
+        }
     });
 }
 
@@ -896,6 +1265,16 @@ function initPage() {
 
     if (page === 'game') {
         initializeGame();
+        return;
+    }
+
+    if (page === 'assessor-dashboard') {
+        initializeAssessorDashboard();
+        return;
+    }
+
+    if (page === 'assessor-pending') {
+        initializeAssessorPending();
     }
 }
 

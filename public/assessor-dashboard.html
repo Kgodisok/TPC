@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SkillsTrack | Assessor Dashboard</title>
+    <link rel="stylesheet" href="../style.css?v=assessor-1" />
+  </head>
+  <body data-page="assessor-dashboard" aria-busy="true">
+    <div id="pageLoader" class="page-loader" role="status" aria-live="polite" aria-atomic="true">
+      <div class="page-loader-content">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <span id="pageLoaderMessage">Checking assessor access...</span>
+      </div>
+    </div>
+    <header class="dashboard-header">
+      <div class="brand-block">
+        <span class="brand-mark">S</span>
+        <span>SkillsTrack at StarSchools</span>
+      </div>
+      <div>
+        <p class="eyebrow">Assessor workspace</p>
+        <h1 id="assessorWelcomeName">Assessor</h1>
+      </div>
+      <button id="logoutButton" class="nav-button danger" type="button">Log out</button>
+    </header>
+
+    <main class="assessor-shell">
+      <section class="assessor-heading">
+        <h1>Student progress</h1>
+        <p>Review learner tasks, assign new work, and update completion.</p>
+      </section>
+      <p id="assessorStatus" class="dashboard-status" aria-live="polite"></p>
+
+      <section class="assessor-stats" aria-label="School progress summary">
+        <div class="assessor-stat"><span>Learners</span><strong id="assessorLearnerCount">0</strong></div>
+        <div class="assessor-stat"><span>Tasks</span><strong id="assessorTaskCount">0</strong></div>
+        <div class="assessor-stat"><span>Completed</span><strong id="assessorCompletedCount">0</strong></div>
+        <div class="assessor-stat"><span>Outstanding</span><strong id="assessorOutstandingCount">0</strong></div>
+      </section>
+
+      <section class="assessor-panel">
+        <div class="assessor-panel-heading">
+          <div>
+            <h2>Learners</h2>
+            <p>Progress is calculated from each learner's assigned tasks.</p>
+          </div>
+          <input id="assessorLearnerSearch" type="search" placeholder="Find a learner" aria-label="Find a learner" />
+        </div>
+        <div class="assessor-table-wrap">
+          <table class="assessor-table">
+            <thead>
+              <tr><th>Learner</th><th>Tasks</th><th>Completed</th><th>Progress</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="assessorLearnerTable"><tr><td colspan="5">Loading learners...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="assessorTaskPanel" class="assessor-panel">
+        <h2>Tasks for <span id="selectedAssessorLearnerName">Select a learner</span></h2>
+        <div id="assessorTaskList" class="task-list">
+          <p class="empty-state">Choose a learner to review their tasks.</p>
+        </div>
+
+        <form id="assessorTaskForm" class="assessor-task-form">
+          <h3>Assign a task</h3>
+          <label for="assessorTaskLearner">Learner</label>
+          <select id="assessorTaskLearner" required>
+            <option value="">Select a learner</option>
+          </select>
+          <label for="assessorTaskTitle">Task title</label>
+          <input id="assessorTaskTitle" type="text" maxlength="120" required />
+          <div class="assessor-form-row">
+            <label for="assessorTaskDueDate">Due date
+              <input id="assessorTaskDueDate" type="date" required />
+            </label>
+            <label for="assessorTaskPriority">Priority
+              <select id="assessorTaskPriority">
+                <option value="High">High</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </label>
+          </div>
+          <label for="assessorTaskDescription">Description</label>
+          <textarea id="assessorTaskDescription" rows="3" maxlength="1000"></textarea>
+          <button class="primary-button" type="submit">Assign task</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
+    <script src="../js/frontend.js?v=assessor-1"></script>
+  </body>
+</html>

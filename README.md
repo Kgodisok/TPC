@@ -19,6 +19,10 @@ SkillsTrack lets learners manage personal learning tasks, track progress, and se
 
 Firebase Auth and Firestore configuration is in `firebase.json`. Before deploying, select the `tpc-project-ad914` project and deploy the Auth provider and Firestore rules with `npx firebase-tools@latest deploy --only auth,firestore:rules --project tpc-project-ad914`. Deploy the site with `npx firebase-tools@latest deploy --only hosting --project tpc-project-ad914`.
 
+## Assessor approval
+
+Assessor signups are created with `role: assessor` and `accountStatus: pending`. They cannot read learner records until a StarSchools administrator verifies the account and changes `accountStatus` to `approved` on that user's `users/{uid}` document in the Firebase console. Learners are approved automatically. Do not ask users to approve their own assessor role.
+
 ## Application pseudocode
 
 ### 1. Start application
