@@ -1,11 +1,11 @@
 const STORAGE_KEY = 'skillsTrackPortal';
 const FIREBASE_CONFIG = {
-    apiKey: 'demo-api-key',
-    authDomain: 'skills-track-demo.firebaseapp.com',
-    projectId: 'skills-track-demo',
-    storageBucket: 'skills-track-demo.appspot.com',
-    messagingSenderId: '1234567890',
-    appId: '1:1234567890:web:demo-app-id'
+    apiKey: 'AIzaSyDB3_eMS2salfFQOX32QuWnWy7rD5xHvJo',
+    authDomain: 'tpc-project-ad914.firebaseapp.com',
+    projectId: 'tpc-project-ad914',
+    storageBucket: 'tpc-project-ad914.firebasestorage.app',
+    messagingSenderId: '734459117823',
+    appId: '1:734459117823:web:ebd27373a4c699c6e60cca'
 };
 
 function getFirebaseConfig() {
@@ -22,16 +22,26 @@ function isFirebaseReady() {
     return Boolean(window.firebase && hasRealValues);
 }
 
-function getAuthClient() {
+function getFirebaseApp() {
     if (!isFirebaseReady()) {
         return null;
     }
 
     if (!window.firebase.apps.length) {
-        window.firebase.initializeApp(getFirebaseConfig());
+        return window.firebase.initializeApp(getFirebaseConfig());
     }
 
-    return window.firebase.auth();
+    return window.firebase.app();
+}
+
+function getAuthClient() {
+    const app = getFirebaseApp();
+    return app ? window.firebase.auth(app) : null;
+}
+
+function getFirestoreClient() {
+    const app = getFirebaseApp();
+    return app && window.firebase.firestore ? window.firebase.firestore(app) : null;
 }
 
 function getState() {
@@ -634,6 +644,7 @@ function attachDashboardEvents() {
 
 function initPage() {
     const page = document.body.dataset.page;
+    window.firestoreDb = getFirestoreClient();
 
     if (page === 'landing') {
         renderLandingStats();

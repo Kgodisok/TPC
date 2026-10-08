@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const { User, Task, Booking, calculateProgress } = require('../backend/models');
 const { validatePassword, registerUser, loginUser, validateSession } = require('../backend/auth');
 const { normalizeTask, createTask, updateTask, deleteTask } = require('../backend/database');
-const { firebaseApp, auth, database } = require('../backend/firebase');
+const { firebaseApp, auth, firestore, database } = require('../backend/firebase');
 const { getLandingHighlights, formatStatValue } = require('../backend/landingPage');
 const { app } = require('../backend/app');
 
@@ -140,7 +140,10 @@ test('database helpers normalize and update tasks', () => {
 test('firebase config exposes initialized services', () => {
     assert.ok(firebaseApp);
     assert.ok(auth);
+    assert.ok(firestore);
     assert.ok(database);
+    assert.equal(firebaseApp.options.projectId, 'tpc-project-ad914');
+    assert.equal(database, firestore);
 });
 
 test('landing page stats are shaped for display', () => {
