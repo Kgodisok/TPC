@@ -13,6 +13,31 @@ let bookings = [];
 let stopTaskListener = null;
 let stopBookingListener = null;
 let redirectAfterSignOut = false;
+let activeLoadingOperations = 0;
+
+function setPageLoading(isLoading, message = 'Please wait...') {
+    const loader = document.getElementById('pageLoader');
+    const loaderMessage = document.getElementById('pageLoaderMessage');
+    if (!loader) return;
+
+    if (loaderMessage) loaderMessage.textContent = message;
+    loader.hidden = !isLoading;
+    document.body.setAttribute('aria-busy', String(isLoading));
+}
+
+async function withPageLoading(message, operation) {
+    activeLoadingOperations += 1;
+    setPageLoading(true, message);
+
+    try {
+        return await operation();
+    } finally {
+        activeLoadingOperations = Math.max(0, activeLoadingOperations - 1);
+        if (activeLoadingOperations === 0) {
+            setPageLoading(false);
+        }
+    }
+}
 
 function getFirebaseConfig() {
     if (window.__FIREBASE_CONFIG__) {
@@ -206,7 +231,7 @@ async function handleLoginSubmit(event) {
     }
 
     try {
-        await auth.signInWithEmailAndPassword(email, password);
+        await withPageLoading('Signing in to your school account...', () => auth.signInWithEmailAndPassword(email, password));
         setAuthMessage('Sign-in successful. Opening your learner dashboard...', 'success');
         setTimeout(() => redirectToDashboard(), 1200);
     } catch (error) {
@@ -248,14 +273,16 @@ async function handleRegisterSubmit(event) {
     }
 
     try {
-        const credential = await auth.createUserWithEmailAndPassword(email, password);
-        const user = credential.user;
-        await user.updateProfile({ displayName: name });
-        await firestore.collection('users').doc(user.uid).set({
-            displayName: name,
-            email: user.email,
-            createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
-            updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        await withPageLoading('Creating your school account...', async () => {
+            const credential = await auth.createUserWithEmailAndPassword(email, password);
+            const user = credential.user;
+            await user.updateProfile({ displayName: name });
+            await firestore.collection('users').doc(user.uid).set({
+                displayName: name,
+                email: user.email,
+                createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+            });
         });
 
         setAuthMessage('Your school account was created successfully. Opening your learner dashboard...', 'success');
@@ -327,18 +354,34 @@ function listenToUserData() {
     if (stopTaskListener) stopTaskListener();
     if (stopBookingListener) stopBookingListener();
 
-    stopTaskListener = userCollection('tasks').onSnapshot((snapshot) => {
-        tasks = snapshot.docs.map((document) => ({ id: document.id, ...document.data() }));
-        renderDashboard();
-    }, (error) => {
-        showDashboardMessage(describeFirebaseError(error, 'load your tasks'));
-    });
+    return new Promise((resolve) => {
+        let tasksLoaded = false;
+        let bookingsLoaded = false;
+        const finishInitialLoad = () => {
+            if (tasksLoaded && bookingsLoaded) resolve();
+        };
 
-    stopBookingListener = userCollection('bookings').onSnapshot((snapshot) => {
-        bookings = snapshot.docs.map((document) => ({ id: document.id, ...document.data() }));
-        renderBookings();
-    }, (error) => {
-        showDashboardMessage(describeFirebaseError(error, 'load your support requests'));
+        stopTaskListener = userCollection('tasks').onSnapshot((snapshot) => {
+            tasks = snapshot.docs.map((document) => ({ id: document.id, ...document.data() }));
+            renderDashboard();
+            tasksLoaded = true;
+            finishInitialLoad();
+        }, (error) => {
+            showDashboardMessage(describeFirebaseError(error, 'load your tasks'));
+            tasksLoaded = true;
+            finishInitialLoad();
+        });
+
+        stopBookingListener = userCollection('bookings').onSnapshot((snapshot) => {
+            bookings = snapshot.docs.map((document) => ({ id: document.id, ...document.data() }));
+            renderBookings();
+            bookingsLoaded = true;
+            finishInitialLoad();
+        }, (error) => {
+            showDashboardMessage(describeFirebaseError(error, 'load your support requests'));
+            bookingsLoaded = true;
+            finishInitialLoad();
+        });
     });
 }
 
@@ -443,18 +486,19 @@ async function handleTaskSubmit(event) {
     };
 
     try {
-        if (editingTaskId) {
-            await userCollection('tasks').doc(editingTaskId).update(taskData);
-            delete submitButton.dataset.editingTaskId;
-            submitButton.textContent = 'Save task';
-            showDashboardMessage('Task updated successfully.', 'success');
-        } else {
-            await userCollection('tasks').add({
-                ...taskData,
-                createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
-            });
-            showDashboardMessage('Task saved successfully.', 'success');
-        }
+        await withPageLoading(editingTaskId ? 'Updating your task...' : 'Saving your task...', async () => {
+            if (editingTaskId) {
+                await userCollection('tasks').doc(editingTaskId).update(taskData);
+                delete submitButton.dataset.editingTaskId;
+                submitButton.textContent = 'Save task';
+            } else {
+                await userCollection('tasks').add({
+                    ...taskData,
+                    createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        });
+        showDashboardMessage(editingTaskId ? 'Task updated successfully.' : 'Task saved successfully.', 'success');
         event.target.reset();
     } catch (error) {
         showDashboardMessage(describeFirebaseError(error, 'save your task'));
@@ -484,7 +528,7 @@ async function handleTaskAction(event) {
 
     if (button.dataset.taskAction === 'delete' && window.confirm('Permanently delete this task?')) {
         try {
-            await userCollection('tasks').doc(task.id).delete();
+            await withPageLoading('Deleting your task...', () => userCollection('tasks').doc(task.id).delete());
             showDashboardMessage('Task deleted successfully.', 'success');
         } catch (error) {
             showDashboardMessage(describeFirebaseError(error, 'delete your task'));
@@ -498,11 +542,11 @@ async function handleTaskToggle(event) {
 
     const completed = checkbox.checked;
     try {
-        await userCollection('tasks').doc(checkbox.dataset.taskId).update({
+        await withPageLoading(completed ? 'Updating task status...' : 'Updating task status...', () => userCollection('tasks').doc(checkbox.dataset.taskId).update({
             completed,
             status: completed ? 'Completed' : 'Pending',
             updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
-        });
+        }));
         showDashboardMessage(completed ? 'Task marked complete.' : 'Task marked outstanding.', 'success');
     } catch (error) {
         checkbox.checked = !completed;
@@ -553,7 +597,7 @@ async function handleBookingAction(event) {
     if (!button || !window.confirm('Cancel this support request?')) return;
 
     try {
-        await userCollection('bookings').doc(button.dataset.bookingId).delete();
+        await withPageLoading('Cancelling your support request...', () => userCollection('bookings').doc(button.dataset.bookingId).delete());
         showDashboardMessage('Support request cancelled.', 'success');
     } catch (error) {
         showDashboardMessage(describeFirebaseError(error, 'cancel your request'));
@@ -583,14 +627,14 @@ async function handleBookingSubmit(event) {
     }
 
     try {
-        await userCollection('bookings').add({
+        await withPageLoading('Sending your support request...', () => userCollection('bookings').add({
             date,
             type,
             notes,
             status: 'Pending',
             createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
             updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
-        });
+        }));
         output.textContent = `Your ${type} request was sent. The school will confirm the session.`;
         output.className = 'booking-status success';
         event.target.reset();
@@ -712,7 +756,7 @@ async function handleLogout() {
 
     try {
         redirectAfterSignOut = true;
-        await auth.signOut();
+        await withPageLoading('Signing out...', () => auth.signOut());
     } catch (error) {
         redirectAfterSignOut = false;
         showDashboardMessage(describeFirebaseError(error, 'sign out'));
@@ -747,12 +791,14 @@ function attachDashboardEvents() {
 function initializeDashboard() {
     const auth = getAuthClient();
     if (!auth || !window.firestoreDb) {
+        setPageLoading(false);
         showDashboardMessage('The school data service is unavailable. Please try again later.');
         return;
     }
 
     attachDashboardEvents();
     setupGame();
+    setPageLoading(true, 'Checking your school account...');
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
             if (stopTaskListener) stopTaskListener();
@@ -762,14 +808,18 @@ function initializeDashboard() {
             tasks = [];
             bookings = [];
             currentUser = null;
+            activeLoadingOperations = 0;
+            setPageLoading(false);
             window.location.replace(redirectAfterSignOut ? '/' : '/public/login.html');
             return;
         }
 
         currentUser = user;
         try {
-            await ensureUserProfile(user);
-            listenToUserData();
+            await withPageLoading('Loading your learner portal...', async () => {
+                await ensureUserProfile(user);
+                await listenToUserData();
+            });
         } catch (error) {
             showDashboardMessage(describeFirebaseError(error, 'load your learner profile'));
         }

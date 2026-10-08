@@ -4,9 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SkillsTrack | Learner Support Portal</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css?v=loader-1" />
   </head>
   <body data-page="landing">
+    <div id="pageLoader" class="page-loader" role="status" aria-live="polite" aria-atomic="true" hidden>
+      <div class="page-loader-content">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <span id="pageLoaderMessage">Loading...</span>
+      </div>
+    </div>
     <header class="site-header">
       <div class="brand-block">
         <span class="brand-mark">S</span>
@@ -87,6 +93,6 @@
     <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
-    <script src="js/frontend.js"></script>
+    <script src="js/frontend.js?v=loader-1"></script>
   </body>
 </html>
