@@ -213,7 +213,7 @@ function describeFirebaseError(error, action) {
         'auth/operation-not-allowed': 'Email and password sign-in is not enabled for this Firebase project.',
         'auth/weak-password': 'Choose a stronger password with at least 8 characters.',
         'auth/network-request-failed': 'Connection failed. Check your internet connection and try again.',
-        'permission-denied': 'Your account could not access this school data. Please try again or contact support.'
+        'permission-denied': 'Your account could not access StarSchools data. Please try again or contact support.'
     };
 
     return messages[error.code] || error.message || `Unable to ${action}. Please try again.`;
@@ -228,12 +228,12 @@ async function handleLoginSubmit(event) {
     const firestore = getFirestoreClient();
 
     if (!auth || !firestore) {
-        setAuthMessage('The school sign-in service is unavailable. Please try again later.', 'error');
+        setAuthMessage('The StarSchools sign-in service is unavailable. Please try again later.', 'error');
         return;
     }
 
     try {
-        const { user, role } = await withPageLoading('Signing in to your school account...', async () => {
+        const { role } = await withPageLoading('Signing in to your StarSchools account...', async () => {
             const credential = await auth.signInWithEmailAndPassword(email, password);
             const profile = await firestore.collection('users').doc(credential.user.uid).get();
             return { user: credential.user, role: profile.data()?.role || 'learner' };
@@ -246,7 +246,7 @@ async function handleLoginSubmit(event) {
             return;
         }
 
-        setAuthMessage('Sign-in successful. Opening your learner dashboard...', 'success');
+        setAuthMessage('Sign-in successful. Opening your StarSchools dashboard...', 'success');
         setTimeout(() => redirectToDashboard(), 1200);
     } catch (error) {
         if (auth.currentUser) await auth.signOut();
@@ -289,12 +289,12 @@ async function handleRegisterSubmit(event) {
     const auth = getAuthClient();
     const firestore = getFirestoreClient();
     if (!auth || !firestore) {
-        setAuthMessage('The school account service is unavailable. Please try again later.', 'error');
+        setAuthMessage('The StarSchools account service is unavailable. Please try again later.', 'error');
         return;
     }
 
     try {
-        await withPageLoading('Creating your school account...', async () => {
+        await withPageLoading('Creating your StarSchools account...', async () => {
             const credential = await auth.createUserWithEmailAndPassword(email, password);
             const user = credential.user;
             await user.updateProfile({ displayName: name });
@@ -307,7 +307,7 @@ async function handleRegisterSubmit(event) {
             });
         });
 
-        setAuthMessage('Your school account was created successfully. Opening your learner dashboard...', 'success');
+        setAuthMessage('Your StarSchools account was created successfully. Opening your dashboard...', 'success');
         setTimeout(() => redirectToDashboard(), 1200);
     } catch (error) {
         setAuthMessage(describeFirebaseError(error, 'create your account'), 'error');
@@ -660,7 +660,7 @@ async function handleBookingSubmit(event) {
             createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
             updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         }));
-        output.textContent = `Your ${type} request was sent. The school will confirm the session.`;
+        output.textContent = `Your ${type} request was sent. StarSchools will confirm the session.`;
         output.className = 'booking-status success';
         event.target.reset();
     } catch (error) {
@@ -817,12 +817,12 @@ function initializeDashboard() {
     const auth = getAuthClient();
     if (!auth || !window.firestoreDb) {
         setPageLoading(false);
-        showDashboardMessage('The school data service is unavailable. Please try again later.');
+        showDashboardMessage('The StarSchools data service is unavailable. Please try again later.');
         return;
     }
 
     attachDashboardEvents();
-    setPageLoading(true, 'Checking your school account...');
+    setPageLoading(true, 'Checking your StarSchools account...');
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
             if (stopTaskListener) stopTaskListener();
