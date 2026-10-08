@@ -376,6 +376,14 @@ button:hover {
   line-height: 1.6;
 }
 
+.supporting-text.error {
+  color: var(--danger);
+}
+
+.supporting-text.success {
+  color: var(--success);
+}
+
 .auth-form label,
 .stack-form label {
   display: block;

@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { User, Task, Booking, calculateProgress } = require('../backend/models');
-const { validatePassword, registerUser, loginUser, validateSession } = require('../backend/auth');
+const { validateDisplayName, validateEmail, validatePassword, registerUser, loginUser, validateSession } = require('../backend/auth');
 const { normalizeTask, createTask, updateTask, deleteTask } = require('../backend/database');
 const { firebaseApp, auth, firestore, database } = require('../backend/firebase');
 const { getLandingHighlights, formatStatValue } = require('../backend/landingPage');
@@ -88,18 +88,33 @@ test('bookings track confirmation lifecycle state', () => {
 
 test('password validation enforces minimum strength requirements', () => {
     assert.equal(validatePassword('short'), false);
-    assert.equal(validatePassword('ValidPass123'), true);
+    assert.equal(validatePassword('ValidPass123'), false);
+    assert.equal(validatePassword('validpass123!'), false);
+    assert.equal(validatePassword('ValidPass123!'), true);
+    assert.equal(validatePassword(`ValidPass123!${'a'.repeat(115)}`), true);
+    assert.equal(validatePassword(`ValidPass123!${'a'.repeat(116)}`), false);
+});
+
+test('registration validators accept structured names and valid email addresses', () => {
+    assert.equal(validateDisplayName('Mary-Jane O\'Connor'), true);
+    assert.equal(validateDisplayName('李 小龍'), true);
+    assert.equal(validateDisplayName('---'), false);
+    assert.equal(validateDisplayName('Taylor2'), false);
+    assert.equal(validateEmail('taylor@example.com'), true);
+    assert.equal(validateEmail('taylor@'), false);
+    assert.equal(validateEmail('taylor..j@example.com'), false);
+    assert.equal(validateEmail('taylor@example'), false);
 });
 
 test('auth registration and login produce a valid session', () => {
     const user = registerUser({
         displayName: 'Taylor',
         email: 'taylor@example.com',
-        password: 'ValidPass123'
+        password: 'ValidPass123!'
     });
 
     assert.equal(user.email, 'taylor@example.com');
-    const session = loginUser({ email: 'taylor@example.com', password: 'ValidPass123' });
+    const session = loginUser({ email: 'taylor@example.com', password: 'ValidPass123!' });
     assert.ok(session && session.userId === user.id);
     assert.equal(validateSession(session.sessionId), true);
 });
@@ -108,13 +123,20 @@ test('auth registration rejects names that are not strings or contain numbers', 
     assert.throws(() => registerUser({
         displayName: 123,
         email: 'numeric.type@example.com',
-        password: 'ValidPass123'
+        password: 'ValidPass123!'
     }), /Display name is required/);
     assert.throws(() => registerUser({
         displayName: 'Taylor2',
         email: 'numeric.name@example.com',
-        password: 'ValidPass123'
+        password: 'ValidPass123!'
     }), /must not contain numbers/);
+});
+
+test('registration rejects malformed names, email addresses, and passwords', () => {
+    const validPassword = 'ValidPass123!';
+    assert.throws(() => registerUser({ displayName: '!!!', email: 'bad-name@example.com', password: validPassword }), /Display name must be/);
+    assert.throws(() => registerUser({ displayName: 'Taylor', email: 'taylor@invalid', password: validPassword }), /valid email address/);
+    assert.throws(() => registerUser({ displayName: 'Taylor', email: 'taylor@example.com', password: 'ValidPass123' }), /Password must be/);
 });
 
 test('database helpers normalize and update tasks', () => {
@@ -164,7 +186,7 @@ test('server exposes auth and task API routes', async () => {
             body: JSON.stringify({
                 displayName: 'API Tester',
                 email: 'api.tester@example.com',
-                password: 'StrongPass123'
+                password: 'StrongPass123!'
             })
         });
 

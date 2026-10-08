@@ -44,13 +44,14 @@
           <p class="supporting-text">Set up your learning portal in a few seconds.</p>
 
           <label for="registerName">Full name</label>
-          <input id="registerName" type="text" placeholder="Your full name" required />
+          <input id="registerName" type="text" placeholder="Your full name" autocomplete="name" minlength="2" maxlength="60" required />
 
           <label for="registerEmail">Email</label>
           <input id="registerEmail" type="email" placeholder="you@example.com" required />
 
           <label for="registerPassword">Password</label>
-          <input id="registerPassword" type="password" placeholder="Create a password" required />
+          <input id="registerPassword" type="password" placeholder="Create a password" autocomplete="new-password" minlength="8" maxlength="128" aria-describedby="passwordRequirements" required />
+          <p id="passwordRequirements" class="supporting-text" aria-live="polite">Use at least 8 characters, with uppercase and lowercase letters, a number, and a symbol (128 max).</p>
 
           <button class="primary-button full-width" type="submit">Create account</button>
         </form>

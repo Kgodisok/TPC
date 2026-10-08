@@ -132,8 +132,80 @@ function setAuthMessage(message, type = 'success') {
     node.classList.add(type);
 }
 
+function updatePasswordFeedback() {
+    const password = document.getElementById('registerPassword')?.value || '';
+    const feedback = document.getElementById('passwordRequirements');
+    if (!feedback) return;
+
+    const requirements = [
+        [password.length >= 8, 'at least 8 characters'],
+        [password.length <= 128, 'no more than 128 characters'],
+        [/[A-Z]/.test(password), 'an uppercase letter'],
+        [/[a-z]/.test(password), 'a lowercase letter'],
+        [/\d/.test(password), 'a number'],
+        [/[^A-Za-z0-9\s]/.test(password), 'a symbol']
+    ];
+    const missing = requirements.filter(([met]) => !met).map(([, message]) => message);
+
+    if (!password) {
+        feedback.textContent = 'Use at least 8 characters, with uppercase and lowercase letters, a number, and a symbol (128 max).';
+        feedback.classList.remove('error', 'success');
+        return;
+    }
+
+    if (missing.length) {
+        feedback.textContent = `Password still needs ${missing.join(', ')}.`;
+        feedback.classList.add('error');
+        feedback.classList.remove('success');
+        return;
+    }
+
+    feedback.textContent = 'Password meets all requirements.';
+    feedback.classList.add('success');
+    feedback.classList.remove('error');
+}
+
 function redirectToDashboard() {
     window.location.href = 'dashboard.html';
+}
+
+function isValidDisplayName(name) {
+    return name.length >= 2
+        && name.length <= 60
+        && /^[\p{L}][\p{L}\p{M}]*(?:[ '\u2019-][\p{L}][\p{L}\p{M}]*)*$/u.test(name);
+}
+
+function isValidEmail(email) {
+    if (email.length > 254) return false;
+
+    const parts = email.split('@');
+    if (parts.length !== 2) return false;
+
+    const [localPart, domain] = parts;
+    if (!localPart || localPart.length > 64 || localPart.startsWith('.') || localPart.endsWith('.') || localPart.includes('..')) {
+        return false;
+    }
+
+    if (!/^[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(localPart)) return false;
+
+    const domainLabels = domain.split('.');
+    if (domainLabels.length < 2 || domainLabels.some((label) => (
+        label.length > 63 || !/^[A-Z0-9](?:[A-Z0-9-]*[A-Z0-9])?$/i.test(label)
+    ))) {
+        return false;
+    }
+
+    const topLevelDomain = domainLabels[domainLabels.length - 1];
+    return /^[A-Z]{2,63}$/i.test(topLevelDomain) || /^xn--[A-Z0-9-]{2,59}$/i.test(topLevelDomain);
+}
+
+function isValidPassword(password) {
+    return password.length >= 8
+        && password.length <= 128
+        && /[A-Z]/.test(password)
+        && /[a-z]/.test(password)
+        && /\d/.test(password)
+        && /[^A-Za-z0-9\s]/.test(password);
 }
 
 function handleLoginSubmit(event) {
@@ -154,7 +226,7 @@ function handleLoginSubmit(event) {
                 };
                 saveState(state);
                 setAuthMessage('Logged in successfully. Redirecting...', 'success');
-                setTimeout(() => redirectToDashboard(), 500);
+                setTimeout(() => redirectToDashboard(), 1200);
             })
             .catch((error) => {
                 setAuthMessage(error.message || 'Unable to sign in right now.', 'error');
@@ -173,22 +245,32 @@ function handleLoginSubmit(event) {
     state.session = { id: match.id, name: match.name, email: match.email };
     saveState(state);
     setAuthMessage('Logged in successfully. Redirecting...', 'success');
-    setTimeout(() => redirectToDashboard(), 500);
+    setTimeout(() => redirectToDashboard(), 1200);
 }
 
 function handleRegisterSubmit(event) {
     event.preventDefault();
-    const name = document.getElementById('registerName').value.trim();
+    const name = document.getElementById('registerName').value.trim().replace(/\s+/g, ' ');
     const email = document.getElementById('registerEmail').value.trim();
-    const password = document.getElementById('registerPassword').value.trim();
+    const password = document.getElementById('registerPassword').value;
 
     if (!name || !email || !password) {
         setAuthMessage('Please complete every field before creating an account.', 'error');
         return;
     }
 
-    if (typeof name !== 'string' || /\d/.test(name)) {
-        setAuthMessage('Your name must be text and must not contain numbers.', 'error');
+    if (!isValidDisplayName(name)) {
+        setAuthMessage('Enter a name using 2-60 letters. Spaces, apostrophes, and hyphens are allowed.', 'error');
+        return;
+    }
+
+    if (!isValidEmail(email)) {
+        setAuthMessage('Enter a valid email address, such as name@example.com.', 'error');
+        return;
+    }
+
+    if (!isValidPassword(password)) {
+        setAuthMessage('Password must be at least 8 characters and include uppercase and lowercase letters, a number, and a symbol (128 characters maximum).', 'error');
         return;
     }
 
@@ -212,7 +294,7 @@ function handleRegisterSubmit(event) {
                 };
                 saveState(state);
                 setAuthMessage('Account created successfully. Redirecting...', 'success');
-                setTimeout(() => redirectToDashboard(), 500);
+                setTimeout(() => redirectToDashboard(), 1200);
             })
             .catch((error) => {
                 setAuthMessage(error.message || 'Unable to create account.', 'error');
@@ -232,7 +314,7 @@ function handleRegisterSubmit(event) {
     state.session = { id: user.id, name: user.name, email: user.email };
     saveState(state);
     setAuthMessage('Account created successfully. Redirecting...', 'success');
-    setTimeout(() => redirectToDashboard(), 500);
+    setTimeout(() => redirectToDashboard(), 1200);
 }
 
 function getCurrentUser() {
@@ -656,7 +738,10 @@ function initPage() {
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
         if (loginForm) loginForm.addEventListener('submit', handleLoginSubmit);
-        if (registerForm) registerForm.addEventListener('submit', handleRegisterSubmit);
+        if (registerForm) {
+            registerForm.addEventListener('submit', handleRegisterSubmit);
+            document.getElementById('registerPassword')?.addEventListener('input', updatePasswordFeedback);
+        }
         return;
     }
 
