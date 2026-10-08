@@ -184,5 +184,11 @@ service cloud.firestore {
         && request.resource.data.updatedAt == request.time;
       allow delete: if false;
     }
+
+    // Collection-group listeners require an explicit recursive wildcard rule.
+    // Writes remain governed by the user-owned tasks match above.
+    match /{path=**}/tasks/{taskId} {
+      allow read: if isApprovedAssessor();
+    }
   }
 }
