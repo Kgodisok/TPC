@@ -449,6 +449,45 @@ button:hover {
   padding: 24px 6vw 60px;
 }
 
+.dashboard-status {
+  grid-column: 1 / -1;
+  min-height: 24px;
+  margin: 0;
+  font-weight: 700;
+}
+
+.dashboard-status:empty {
+  display: none;
+}
+
+.dashboard-status.error {
+  color: var(--danger);
+}
+
+.dashboard-status.success {
+  color: var(--success);
+}
+
+.booking-list {
+  display: grid;
+  gap: 12px;
+}
+
+.booking-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e8eef8;
+  border-radius: 8px;
+  background: #f9fbff;
+}
+
+.booking-row p {
+  margin: 6px 0 0;
+}
+
 .sidebar-panel,
 .main-panel,
 .panel-block,

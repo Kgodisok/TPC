@@ -1,33 +1,27 @@
-﻿# Website Link:  https://tpc-project-ad914.web.app
-"# TPC" 
+﻿# SkillsTrack Learner Portal
 
-## Project-overview
+Website: https://tpc-project-ad914.web.app
 
+SkillsTrack lets learners manage personal learning tasks, track progress, and send support requests to their school. Accounts use Firebase Authentication; learner profiles, tasks, and support requests are stored in Cloud Firestore.
 
-Hello World
+## Technologies
 
-# ABOUT
-This project is about registaring a new user, siging in and manage own tasks and also book support,book progress,play the mini-game amd print a progress summary.
+- HTML, CSS, and JavaScript
+- Firebase Authentication (email/password)
+- Cloud Firestore
+- Express static server for local development
 
-#  Minimium features 
-User registration,sign-in,authenticated user state and sign-out.
-Dashboard displaying task tools,completed work,outstanding work and calculated progress.
-Task manager with create ,read,update and delete functions.
-Support-session booking form with validation and status feedback.
-Search,fliter or sort functionality using arrays and higher-order functions.
-Confirmation dialog before a destructive action,a redirect after an appropriate action and a printable progress summary.
-At least one animation driven by javascript timers and one controlled multimedia element.
-A basic operable minn-game created with an Assessor-approved JavaScript framework.
+## Run locally
 
-# Technologies used
-1.HTML,CSS3 and JavaScript(ES6)
-2.Visual Studio Code
-3.Firebase Cloud Firestore (initialized; task and booking data are currently stored in localStorage)
-4.Firebase authentication
+1. Install dependencies with `npm install`.
+2. Start the site with `npm start`.
+3. Open http://localhost:3000.
 
-# Application pseudocode
+Firebase Auth and Firestore configuration is in `firebase.json`. Before deploying, select the `tpc-project-ad914` project and deploy the Auth provider and Firestore rules with `npx firebase-tools@latest deploy --only auth,firestore:rules --project tpc-project-ad914`. Deploy the site with `npx firebase-tools@latest deploy --only hosting --project tpc-project-ad914`.
 
-## 1. Start application
+## Application pseudocode
+
+### 1. Start application
 ```text
 START application
 	LOAD the requested page and its JavaScript
@@ -37,36 +31,21 @@ START application
 
 	IF page type is landing THEN
 		DISPLAY public information
-		START the landing-page statistics animation
 	ELSE IF page type is login THEN
-		LOAD application state from localStorage
-		INITIALISE Firebase Authentication when needed
 		ATTACH login, registration, and tab handlers
 	ELSE IF page type is dashboard THEN
-		LOAD application state from localStorage
-		RESTORE the Firebase or demo session
-		DISPLAY the learner name, tasks, and progress
-		ATTACH dashboard event handlers
-		INITIALISE the learning challenge
+		OBSERVE Firebase Authentication state
+		IF user is signed in THEN
+			LOAD the user's Firestore profile, tasks, and support requests
+			DISPLAY learner dashboard
+		ELSE
+			REDIRECT to sign in
+		END IF
 	END IF
 END application
 ```
 
-## 2. Display landing page
-```text
-START displayLandingPage
-	DISPLAY the introduction, features, support link, and progress summary
-	DISPLAY the initial task, session, and progress statistics
-
-	EVERY animation interval
-		UPDATE the displayed task and progress values
-	END EVERY
-END displayLandingPage
-```
-
-The landing-page statistics are animated display values; they are not loaded from Firestore.
-
-## 3. Register a user
+### 2. Register a learner
 ```text
 START registerUser
 	READ name, email, and password
@@ -76,88 +55,59 @@ START registerUser
 		STOP
 	END IF
 
-	IF name contains a number THEN
-		DISPLAY a name validation error
+	IF name or email has an invalid format OR password does not meet strength rules THEN
+		DISPLAY the specific validation feedback
 		STOP
 	END IF
 
-	IF Firebase Authentication is configured THEN
-		CREATE the Firebase account with email and password
-		SET the user's display name
-		SAVE the Firebase user's ID, name, and email as the session
-	ELSE
-		IF an account with the email already exists in local state THEN
-			DISPLAY an already-registered error
-			STOP
-		END IF
-		ADD the demo account to local state
-		SAVE the local session
-	END IF
-
-	SAVE local application state
-	DISPLAY success feedback
+	CREATE account with Firebase Authentication
+	SET the Firebase display name
+	CREATE a private Firestore profile at users/{uid}
+	DISPLAY account-created feedback
 	REDIRECT to the dashboard
+ON ERROR
+	DISPLAY a useful account or network error
 END registerUser
 ```
 
-## 4. Sign in
+### 3. Sign in and sign out
 ```text
 START signIn
-	READ email and password
-
-	IF Firebase Authentication is configured THEN
-		SIGN IN with Firebase Authentication
-		SAVE the Firebase user's ID, name, and email as the session
-	ELSE
-		FIND a matching account in local state
-
-		IF no matching account exists THEN
-			DISPLAY invalid credentials and demo account guidance
-			STOP
-		END IF
-
-		SAVE the local session
-	END IF
-
-	SAVE local application state
-	DISPLAY success feedback
-	REDIRECT to the dashboard
+    READ email and password
+    SIGN IN with Firebase Authentication
+    IF sign-in succeeds THEN
+        DISPLAY success feedback
+        REDIRECT to the dashboard
+    ELSE
+        DISPLAY an actionable error
+    END IF
 END signIn
+
+START signOut
+    SIGN OUT with Firebase Authentication
+    STOP Firestore listeners
+    REDIRECT to the public landing page
+END signOut
 ```
 
-## 5. Load dashboard and calculate progress
+### 4. Load learner data and progress
 ```text
 START loadDashboard
-	GET the current Firebase user when available
-
-	IF a Firebase session exists THEN
-		USE the Firebase user's name and ID
-	ELSE
-		RESTORE the saved local session
-		IF no local session exists THEN
-			USE the demo learner session when available
-		END IF
-	END IF
-
-	LOAD tasks from local application state
-	COUNT completed tasks
-	COUNT outstanding tasks
-
-	IF there are no tasks THEN
-		SET completion percentage to zero
-	ELSE
-		CALCULATE completed tasks divided by total tasks as a percentage
-	END IF
-
-	DISPLAY learner name, counts, percentage, and progress bar
-	DISPLAY the task list
+	CHECK Firebase Authentication state
+	READ profile from users/{uid}
+	SUBSCRIBE to users/{uid}/tasks and users/{uid}/bookings
+	WHEN task snapshots change
+		DISPLAY tasks
+		CALCULATE completed and outstanding counts
+		CALCULATE progress percentage
+	END WHEN
 END loadDashboard
 ```
 
-## 6. Search, filter, and sort tasks
+### 5. Search, filter, and sort tasks
 ```text
 START displayTasks
-	COPY tasks from local application state
+	COPY the current Firestore task snapshot
 
 	IF a search term exists THEN
 		KEEP tasks whose title or description contains the search term
@@ -185,7 +135,7 @@ START displayTasks
 END displayTasks
 ```
 
-## 7. Create or edit a task
+### 6. Create or edit a task
 ```text
 START saveTask
 	READ title, due date, priority, status, and description
@@ -195,26 +145,22 @@ START saveTask
 	END IF
 
 	IF an existing task is being edited THEN
-		UPDATE that task in local application state
+		UPDATE that task in users/{uid}/tasks
 	ELSE
-		CREATE a task with a new ID and add it to local application state
+		CREATE a task in users/{uid}/tasks
 	END IF
 
 	SET completed based on whether status is Completed
-	SAVE application state to localStorage
-	CLEAR the form
-	REFRESH task list and progress summary
+	DISPLAY save feedback
+	LET the Firestore listener refresh the task list and progress
 END saveTask
 ```
 
-## 8. Complete or delete a task
+### 7. Complete or delete a task
 ```text
 START updateTaskStatus
-	FIND the selected task
-	TOGGLE its completed value
-	SET status to Completed or Pending
-	SAVE application state to localStorage
-	REFRESH task list and progress summary
+	UPDATE completed and status in the user's Firestore task
+	DISPLAY result feedback
 END updateTaskStatus
 
 START deleteTask
@@ -224,31 +170,33 @@ START deleteTask
 		STOP
 	END IF
 
-	REMOVE the selected task from local application state
-	SAVE application state to localStorage
-	REFRESH task list and progress summary
+	DELETE the selected Firestore task
+	DISPLAY result feedback
 END deleteTask
 ```
 
-## 9. Book a support session
+### 8. Send or cancel a support request
 ```text
 START bookSession
 	READ session date, type, and notes
 
-	IF date or notes is missing THEN
+	IF date is in the past OR notes are outside allowed length THEN
 		DISPLAY a validation error
 		STOP
 	END IF
 
-	CREATE a confirmed booking
-	ADD the booking to local application state
-	SAVE application state to localStorage
-	DISPLAY confirmation with session type and date
-	CLEAR the booking form
-END bookSession
+	CREATE a Pending request in users/{uid}/bookings
+	DISPLAY that the request was saved, not yet confirmed
+END sendSupportRequest
+
+START cancelSupportRequest
+	ASK the learner to confirm cancellation
+	DELETE the selected request from users/{uid}/bookings
+	DISPLAY result feedback
+END cancelSupportRequest
 ```
 
-## 10. Play the learning challenge
+### 9. Play the learning challenge
 ```text
 START learningChallenge
 	SET score to zero
@@ -278,7 +226,7 @@ START learningChallenge
 END learningChallenge
 ```
 
-## 11. Print progress summary
+### 10. Print progress summary
 ```text
 START printProgress
 	CALCULATE completed tasks, outstanding tasks, and completion percentage
@@ -286,26 +234,10 @@ START printProgress
 END printProgress
 ```
 
-## 12. Sign out
-```text
-START signOut
-	IF Firebase Authentication is configured THEN
-		SIGN OUT the Firebase user
-	END IF
+## School administration scope
 
-	CLEAR the local session
-	SAVE local application state
-	REDIRECT to the landing page
-END signOut
-```
+The current application is a learner portal: each authenticated learner can manage their own tasks and send/cancel their own support requests. It does not yet provide staff accounts, task assignment, or an in-app staff workflow to confirm support requests; requests remain pending until staff process them separately.
 
-Firebase Firestore is initialized for the application, but authentication is handled by Firebase Authentication and task, booking, and demo session data are currently stored in localStorage. The task and booking flows do not yet read from or write to Firestore.
+## Authors
 
-# Installation
-1.Clone the repository
-2.Open the project folder
-3.Open the application in VS code.
-4.Run the application
-
-# Authors 
-Kgodiso Motsepe,Karrel Esterhuizen,Sbusiso Nhlapho
+Kgodiso Motsepe, Karrel Esterhuizen, Sbusiso Nhlapho

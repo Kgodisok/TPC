@@ -23,6 +23,7 @@
     </header>
 
     <main class="dashboard-shell">
+      <p id="dashboardStatus" class="dashboard-status" aria-live="polite"></p>
       <aside class="sidebar-panel left-panel">
         <h2>Progress</h2>
         <div class="mini-stat">
@@ -62,7 +63,9 @@
               </select>
             </div>
           </div>
-          <div id="taskList" class="task-list"></div>
+          <div id="taskList" class="task-list">
+            <p class="empty-state">Loading your tasks...</p>
+          </div>
         </div>
 
         <div class="panel-block">
@@ -71,7 +74,7 @@
             <div class="two-column">
               <label>
                 Task title
-                <input id="taskTitle" type="text" placeholder="Submit portfolio draft" required />
+                <input id="taskTitle" type="text" maxlength="120" placeholder="Add a learning task" required />
               </label>
               <label>
                 Due date
@@ -97,14 +100,14 @@
             </div>
             <label>
               Description
-              <textarea id="taskDescription" rows="3" placeholder="Describe the task details..."></textarea>
+              <textarea id="taskDescription" rows="3" maxlength="1000" placeholder="Describe the task details..."></textarea>
             </label>
             <button class="primary-button" type="submit">Save task</button>
           </form>
         </div>
 
         <div class="panel-block">
-          <h2>Book support</h2>
+          <h2>Request support</h2>
           <form id="bookingForm" class="stack-form">
             <div class="two-column">
               <label>
@@ -122,11 +125,15 @@
             </div>
             <label>
               Notes
-              <textarea id="bookingNotes" rows="3" placeholder="Tell us what you need help with" required></textarea>
+              <textarea id="bookingNotes" rows="3" minlength="5" maxlength="500" placeholder="Tell us what you need help with" required></textarea>
             </label>
-            <button class="secondary-button" type="submit">Book session</button>
+            <button class="secondary-button" type="submit">Send support request</button>
           </form>
           <div id="bookingStatus" class="booking-status" aria-live="polite"></div>
+          <h3>Your support requests</h3>
+          <div id="bookingList" class="booking-list">
+            <p class="empty-state">Loading your requests...</p>
+          </div>
         </div>
       </section>
 

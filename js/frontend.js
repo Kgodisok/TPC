@@ -1,4 +1,3 @@
-const STORAGE_KEY = 'skillsTrackPortal';
 const FIREBASE_CONFIG = {
     apiKey: 'AIzaSyDB3_eMS2salfFQOX32QuWnWy7rD5xHvJo',
     authDomain: 'tpc-project-ad914.firebaseapp.com',
@@ -7,6 +6,13 @@ const FIREBASE_CONFIG = {
     messagingSenderId: '734459117823',
     appId: '1:734459117823:web:ebd27373a4c699c6e60cca'
 };
+
+let currentUser = null;
+let tasks = [];
+let bookings = [];
+let stopTaskListener = null;
+let stopBookingListener = null;
+let redirectAfterSignOut = false;
 
 function getFirebaseConfig() {
     if (window.__FIREBASE_CONFIG__) {
@@ -18,8 +24,7 @@ function getFirebaseConfig() {
 
 function isFirebaseReady() {
     const config = getFirebaseConfig();
-    const hasRealValues = Boolean(config.apiKey && config.apiKey !== 'demo-api-key' && config.projectId && config.projectId !== 'skills-track-demo');
-    return Boolean(window.firebase && hasRealValues);
+    return Boolean(window.firebase && config.apiKey && config.projectId);
 }
 
 function getFirebaseApp() {
@@ -44,30 +49,23 @@ function getFirestoreClient() {
     return app && window.firebase.firestore ? window.firebase.firestore(app) : null;
 }
 
-function getState() {
-    try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) {
-            const initial = {
-                users: [{ id: 'demo-user', name: 'Learner Demo', email: 'learner@skillstrack.local', password: 'demo123' }],
-                session: null,
-                tasks: [
-                    { id: 'task-101', title: 'Submit project brief', dueDate: '2026-10-06', priority: 'High', status: 'Pending', description: 'Finish the final brief for review.', completed: false },
-                    { id: 'task-102', title: 'Complete reflection', dueDate: '2026-10-08', priority: 'Medium', status: 'Completed', description: 'Write a short reflection on the study plan.', completed: true }
-                ],
-                bookings: []
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-            return initial;
-        }
-        return JSON.parse(saved);
-    } catch (error) {
-        return { users: [], session: null, tasks: [], bookings: [] };
-    }
+function userDocument(user = currentUser) {
+    return window.firestoreDb.collection('users').doc(user.uid);
 }
 
-function saveState(state) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+function userCollection(name) {
+    if (!currentUser || !window.firestoreDb) {
+        throw new Error('Sign in is required to access learner data.');
+    }
+
+    return userDocument().collection(name);
+}
+
+function showDashboardMessage(message, type = 'error') {
+    const node = document.getElementById('dashboardStatus');
+    if (!node) return;
+    node.textContent = message;
+    node.className = `dashboard-status ${type}`;
 }
 
 function calculateProgress(tasks) {
@@ -76,32 +74,6 @@ function calculateProgress(tasks) {
     const outstanding = total - completed;
     const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
     return { total, completed, outstanding, percentage };
-}
-
-function renderLandingStats() {
-    const elements = document.querySelectorAll('[data-live-stat]');
-    if (!elements.length) return;
-
-    const liveValues = {
-        tasks: '48',
-        sessions: '12',
-        progress: '88%'
-    };
-
-    elements.forEach((element) => {
-        const key = element.dataset.liveStat;
-        element.textContent = liveValues[key] || element.textContent;
-    });
-
-    let tick = 0;
-    setInterval(() => {
-        tick += 1;
-        const values = ['48', '52', '61', '73', '84', '88'];
-        const label = document.querySelector('[data-live-stat="tasks"]');
-        const progress = document.querySelector('[data-live-stat="progress"]');
-        if (label) label.textContent = values[tick % values.length];
-        if (progress) progress.textContent = `${((tick * 7) % 90) + 10}%`;
-    }, 1800);
 }
 
 function setupAuthTabs() {
@@ -166,7 +138,7 @@ function updatePasswordFeedback() {
 }
 
 function redirectToDashboard() {
-    window.location.href = 'dashboard.html';
+    window.location.href = '/public/dashboard.html';
 }
 
 function isValidDisplayName(name) {
@@ -208,47 +180,41 @@ function isValidPassword(password) {
         && /[^A-Za-z0-9\s]/.test(password);
 }
 
-function handleLoginSubmit(event) {
-    event.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value.trim();
-    const auth = getAuthClient();
+function describeFirebaseError(error, action) {
+    const messages = {
+        'auth/email-already-in-use': 'An account already exists for this email. Sign in instead.',
+        'auth/invalid-credential': 'The email or password is incorrect.',
+        'auth/invalid-email': 'Enter a valid email address.',
+        'auth/operation-not-allowed': 'Email and password sign-in is not enabled for this Firebase project.',
+        'auth/weak-password': 'Choose a stronger password with at least 8 characters.',
+        'auth/network-request-failed': 'Connection failed. Check your internet connection and try again.',
+        'permission-denied': 'Your account could not access this school data. Please try again or contact support.'
+    };
 
-    if (auth) {
-        auth.signInWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                const currentUser = userCredential.user;
-                const state = getState();
-                state.session = {
-                    id: currentUser.uid,
-                    name: currentUser.displayName || currentUser.email.split('@')[0],
-                    email: currentUser.email
-                };
-                saveState(state);
-                setAuthMessage('Logged in successfully. Redirecting...', 'success');
-                setTimeout(() => redirectToDashboard(), 1200);
-            })
-            .catch((error) => {
-                setAuthMessage(error.message || 'Unable to sign in right now.', 'error');
-            });
-        return;
-    }
-
-    const state = getState();
-    const match = state.users.find((user) => user.email.toLowerCase() === email.toLowerCase() && user.password === password);
-
-    if (!match) {
-        setAuthMessage('Incorrect email or password. Try the demo account: learner@skillstrack.local / demo123', 'error');
-        return;
-    }
-
-    state.session = { id: match.id, name: match.name, email: match.email };
-    saveState(state);
-    setAuthMessage('Logged in successfully. Redirecting...', 'success');
-    setTimeout(() => redirectToDashboard(), 1200);
+    return messages[error.code] || error.message || `Unable to ${action}. Please try again.`;
 }
 
-function handleRegisterSubmit(event) {
+async function handleLoginSubmit(event) {
+    event.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const auth = getAuthClient();
+
+    if (!auth) {
+        setAuthMessage('The school sign-in service is unavailable. Please try again later.', 'error');
+        return;
+    }
+
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+        setAuthMessage('Sign-in successful. Opening your learner dashboard...', 'success');
+        setTimeout(() => redirectToDashboard(), 1200);
+    } catch (error) {
+        setAuthMessage(describeFirebaseError(error, 'sign in'), 'error');
+    }
+}
+
+async function handleRegisterSubmit(event) {
     event.preventDefault();
     const name = document.getElementById('registerName').value.trim().replace(/\s+/g, ' ');
     const email = document.getElementById('registerEmail').value.trim();
@@ -275,89 +241,67 @@ function handleRegisterSubmit(event) {
     }
 
     const auth = getAuthClient();
-    if (auth) {
-        auth.createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                const currentUser = userCredential.user;
-                if (currentUser && typeof currentUser.updateProfile === 'function') {
-                    return currentUser.updateProfile({ displayName: name }).then(() => currentUser);
-                }
-
-                return currentUser;
-            })
-            .then((currentUser) => {
-                const state = getState();
-                state.session = {
-                    id: currentUser.uid,
-                    name: currentUser.displayName || name,
-                    email: currentUser.email
-                };
-                saveState(state);
-                setAuthMessage('Account created successfully. Redirecting...', 'success');
-                setTimeout(() => redirectToDashboard(), 1200);
-            })
-            .catch((error) => {
-                setAuthMessage(error.message || 'Unable to create account.', 'error');
-            });
+    const firestore = getFirestoreClient();
+    if (!auth || !firestore) {
+        setAuthMessage('The school account service is unavailable. Please try again later.', 'error');
         return;
     }
 
-    const state = getState();
-    const existing = state.users.find((user) => user.email.toLowerCase() === email.toLowerCase());
-    if (existing) {
-        setAuthMessage('That email is already registered. Use sign in instead.', 'error');
-        return;
-    }
+    try {
+        const credential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = credential.user;
+        await user.updateProfile({ displayName: name });
+        await firestore.collection('users').doc(user.uid).set({
+            displayName: name,
+            email: user.email,
+            createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-    const user = { id: `user-${Date.now()}`, name, email, password };
-    state.users.push(user);
-    state.session = { id: user.id, name: user.name, email: user.email };
-    saveState(state);
-    setAuthMessage('Account created successfully. Redirecting...', 'success');
-    setTimeout(() => redirectToDashboard(), 1200);
+        setAuthMessage('Your school account was created successfully. Opening your learner dashboard...', 'success');
+        setTimeout(() => redirectToDashboard(), 1200);
+    } catch (error) {
+        setAuthMessage(describeFirebaseError(error, 'create your account'), 'error');
+    }
 }
 
 function getCurrentUser() {
-    const auth = getAuthClient();
-    if (auth && auth.currentUser) {
-        return {
-            id: auth.currentUser.uid,
-            name: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || 'Learner',
-            email: auth.currentUser.email
-        };
-    }
-
-    const state = getState();
-    return state.session ? state.users.find((user) => user.id === state.session.id) : null;
+    if (!currentUser) return null;
+    return {
+        id: currentUser.uid,
+        name: currentUser.displayName || currentUser.email?.split('@')[0] || 'Learner',
+        email: currentUser.email
+    };
 }
 
-function ensureSession() {
-    const auth = getAuthClient();
-    if (auth && auth.currentUser) {
-        const state = getState();
-        state.session = {
-            id: auth.currentUser.uid,
-            name: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || 'Learner',
-            email: auth.currentUser.email
-        };
-        saveState(state);
+async function ensureUserProfile(user) {
+    const profileRef = userDocument(user);
+    const profileSnapshot = await profileRef.get();
+    const profile = profileSnapshot.data() || {};
+    const displayName = user.displayName || profile.displayName || 'Learner';
+    const email = user.email || profile.email || '';
+
+    if (!profileSnapshot.exists) {
+        await profileRef.set({
+            displayName,
+            email,
+            createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        });
         return;
     }
 
-    const state = getState();
-    if (!state.session) {
-        const demoUser = state.users[0];
-        if (demoUser) {
-            state.session = { id: demoUser.id, name: demoUser.name, email: demoUser.email };
-            saveState(state);
-        }
+    const updates = {};
+    if (profile.displayName !== displayName) updates.displayName = displayName;
+    if (profile.email !== email) updates.email = email;
+    if (Object.keys(updates).length) {
+        updates.updatedAt = window.firebase.firestore.FieldValue.serverTimestamp();
+        await profileRef.update(updates);
     }
 }
 
 function renderDashboard() {
     const user = getCurrentUser();
-    const state = getState();
-    const tasks = state.tasks;
     const progress = calculateProgress(tasks);
 
     const welcomeName = document.getElementById('welcomeName');
@@ -375,26 +319,47 @@ function renderDashboard() {
     if (percent) percent.textContent = `${progress.percentage}%`;
     if (sidebarProgressBar) sidebarProgressBar.style.width = `${progress.percentage}%`;
 
-    const summaryCompleted = document.getElementById('summaryCompleted');
-    const summaryOutstanding = document.getElementById('summaryOutstanding');
-    const summaryPercentage = document.getElementById('summaryPercentage');
-    if (summaryCompleted) summaryCompleted.textContent = String(progress.completed);
-    if (summaryOutstanding) summaryOutstanding.textContent = String(progress.outstanding);
-    if (summaryPercentage) summaryPercentage.textContent = `${progress.percentage}%`;
-
     renderTasks();
+    renderBookings();
+}
+
+function listenToUserData() {
+    if (stopTaskListener) stopTaskListener();
+    if (stopBookingListener) stopBookingListener();
+
+    stopTaskListener = userCollection('tasks').onSnapshot((snapshot) => {
+        tasks = snapshot.docs.map((document) => ({ id: document.id, ...document.data() }));
+        renderDashboard();
+    }, (error) => {
+        showDashboardMessage(describeFirebaseError(error, 'load your tasks'));
+    });
+
+    stopBookingListener = userCollection('bookings').onSnapshot((snapshot) => {
+        bookings = snapshot.docs.map((document) => ({ id: document.id, ...document.data() }));
+        renderBookings();
+    }, (error) => {
+        showDashboardMessage(describeFirebaseError(error, 'load your support requests'));
+    });
+}
+
+function escapeHtml(value = '') {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 function renderTasks() {
     const taskList = document.getElementById('taskList');
     if (!taskList) return;
 
-    const state = getState();
     const search = document.getElementById('taskSearch')?.value.trim().toLowerCase() || '';
     const filterValue = document.getElementById('taskFilter')?.value || 'all';
     const sortValue = document.getElementById('taskSort')?.value || 'newest';
 
-    let visibleTasks = [...state.tasks];
+    let visibleTasks = [...tasks];
 
     if (search) {
         visibleTasks = visibleTasks.filter((task) => task.title.toLowerCase().includes(search) || task.description.toLowerCase().includes(search));
@@ -416,7 +381,7 @@ function renderTasks() {
             const order = { High: 3, Medium: 2, Low: 1 };
             return order[b.priority] - order[a.priority];
         }
-        return new Date(b.dueDate) - new Date(a.dueDate);
+        return (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0);
     });
 
     if (!visibleTasks.length) {
@@ -428,84 +393,27 @@ function renderTasks() {
         const isComplete = task.completed || task.status === 'Completed';
         return `
       <article class="task-card ${isComplete ? 'completed' : ''}">
-        <input class="task-check" type="checkbox" data-task-action="toggle" data-task-id="${task.id}" ${isComplete ? 'checked' : ''} aria-label="Toggle task completion" />
+                <input class="task-check" type="checkbox" data-task-action="toggle" data-task-id="${escapeHtml(task.id)}" ${isComplete ? 'checked' : ''} aria-label="Toggle task completion" />
         <div class="task-info">
-          <h3>${task.title}</h3>
+                    <h3>${escapeHtml(task.title)}</h3>
           <div class="task-meta">
-            <span>${task.dueDate}</span>
-            <span class="task-badge ${task.priority.toLowerCase()}">${task.priority}</span>
+                        <span>${escapeHtml(task.dueDate)}</span>
+                        <span class="task-badge ${escapeHtml(task.priority.toLowerCase())}">${escapeHtml(task.priority)}</span>
             <span>${isComplete ? 'Completed' : 'Outstanding'}</span>
           </div>
-          <p>${task.description || 'No description provided.'}</p>
+                    <p>${escapeHtml(task.description || 'No description provided.')}</p>
         </div>
         <div class="task-actions">
-          <button class="task-button edit" type="button" data-task-action="edit" data-task-id="${task.id}">Edit</button>
-          <button class="task-button delete" type="button" data-task-action="delete" data-task-id="${task.id}">Delete</button>
+                    <button class="task-button edit" type="button" data-task-action="edit" data-task-id="${escapeHtml(task.id)}">Edit</button>
+                    <button class="task-button delete" type="button" data-task-action="delete" data-task-id="${escapeHtml(task.id)}">Delete</button>
         </div>
       </article>
     `;
     }).join('');
-
-    taskList.querySelectorAll('[data-task-action]').forEach((button) => {
-        button.addEventListener('click', (event) => {
-            const { action, taskId } = event.target.dataset;
-            const task = getState().tasks.find((item) => item.id === taskId);
-            if (!task) return;
-
-            if (action === 'toggle') {
-                task.completed = !task.completed;
-                task.status = task.completed ? 'Completed' : 'Pending';
-            }
-
-            if (action === 'delete') {
-                const confirmed = window.confirm('Delete this task permanently?');
-                if (!confirmed) return;
-                const nextState = getState();
-                nextState.tasks = nextState.tasks.filter((item) => item.id !== taskId);
-                saveState(nextState);
-            }
-
-            if (action === 'edit') {
-                const titleInput = document.getElementById('taskTitle');
-                const dueInput = document.getElementById('taskDueDate');
-                const priorityInput = document.getElementById('taskPriority');
-                const statusInput = document.getElementById('taskStatus');
-                const descriptionInput = document.getElementById('taskDescription');
-
-                titleInput.value = task.title;
-                dueInput.value = task.dueDate;
-                priorityInput.value = task.priority;
-                statusInput.value = task.status;
-                descriptionInput.value = task.description || '';
-
-                const existingTaskButton = document.querySelector('#taskForm button[type="submit"]');
-                existingTaskButton.dataset.editingTaskId = taskId;
-                existingTaskButton.textContent = 'Update task';
-            }
-
-            const state = getState();
-            saveState(state);
-            renderDashboard();
-        });
-    });
-
-    taskList.querySelectorAll('.task-check').forEach((checkbox) => {
-        checkbox.addEventListener('change', (event) => {
-            const id = event.target.dataset.taskId;
-            const state = getState();
-            const task = state.tasks.find((item) => item.id === id);
-            if (!task) return;
-            task.completed = event.target.checked;
-            task.status = event.target.checked ? 'Completed' : 'Pending';
-            saveState(state);
-            renderDashboard();
-        });
-    });
 }
 
-function handleTaskSubmit(event) {
+async function handleTaskSubmit(event) {
     event.preventDefault();
-    const state = getState();
     const title = document.getElementById('taskTitle').value.trim();
     const dueDate = document.getElementById('taskDueDate').value;
     const priority = document.getElementById('taskPriority').value;
@@ -515,66 +423,181 @@ function handleTaskSubmit(event) {
     const editingTaskId = submitButton?.dataset.editingTaskId;
 
     if (!title || !dueDate) {
+        showDashboardMessage('Enter a task title and due date before saving.');
         return;
     }
 
-    if (editingTaskId) {
-        const task = state.tasks.find((item) => item.id === editingTaskId);
-        if (task) {
-            task.title = title;
-            task.dueDate = dueDate;
-            task.priority = priority;
-            task.status = status;
-            task.description = description;
-            task.completed = status === 'Completed';
-        }
-        delete submitButton.dataset.editingTaskId;
-        submitButton.textContent = 'Save task';
-    } else {
-        state.tasks.push({
-            id: `task-${Date.now()}`,
-            title,
-            dueDate,
-            priority,
-            status,
-            description,
-            completed: status === 'Completed'
-        });
+    if (title.length > 120 || description.length > 1000) {
+        showDashboardMessage('Task titles must be 120 characters or fewer, and descriptions 1,000 or fewer.');
+        return;
     }
 
-    saveState(state);
-    event.target.reset();
-    renderDashboard();
+    const taskData = {
+        title,
+        dueDate,
+        priority,
+        status,
+        description,
+        completed: status === 'Completed',
+        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    try {
+        if (editingTaskId) {
+            await userCollection('tasks').doc(editingTaskId).update(taskData);
+            delete submitButton.dataset.editingTaskId;
+            submitButton.textContent = 'Save task';
+            showDashboardMessage('Task updated successfully.', 'success');
+        } else {
+            await userCollection('tasks').add({
+                ...taskData,
+                createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showDashboardMessage('Task saved successfully.', 'success');
+        }
+        event.target.reset();
+    } catch (error) {
+        showDashboardMessage(describeFirebaseError(error, 'save your task'));
+    }
 }
 
-function handleBookingSubmit(event) {
+async function handleTaskAction(event) {
+    const button = event.target.closest('button[data-task-action]');
+    if (!button) return;
+
+    const task = tasks.find((item) => item.id === button.dataset.taskId);
+    if (!task) return;
+
+    if (button.dataset.taskAction === 'edit') {
+        document.getElementById('taskTitle').value = task.title;
+        document.getElementById('taskDueDate').value = task.dueDate;
+        document.getElementById('taskPriority').value = task.priority;
+        document.getElementById('taskStatus').value = task.status;
+        document.getElementById('taskDescription').value = task.description || '';
+
+        const submitButton = document.querySelector('#taskForm button[type="submit"]');
+        submitButton.dataset.editingTaskId = task.id;
+        submitButton.textContent = 'Update task';
+        document.getElementById('taskTitle').focus();
+        return;
+    }
+
+    if (button.dataset.taskAction === 'delete' && window.confirm('Permanently delete this task?')) {
+        try {
+            await userCollection('tasks').doc(task.id).delete();
+            showDashboardMessage('Task deleted successfully.', 'success');
+        } catch (error) {
+            showDashboardMessage(describeFirebaseError(error, 'delete your task'));
+        }
+    }
+}
+
+async function handleTaskToggle(event) {
+    const checkbox = event.target.closest('input[data-task-action="toggle"]');
+    if (!checkbox) return;
+
+    const completed = checkbox.checked;
+    try {
+        await userCollection('tasks').doc(checkbox.dataset.taskId).update({
+            completed,
+            status: completed ? 'Completed' : 'Pending',
+            updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showDashboardMessage(completed ? 'Task marked complete.' : 'Task marked outstanding.', 'success');
+    } catch (error) {
+        checkbox.checked = !completed;
+        showDashboardMessage(describeFirebaseError(error, 'update your task'));
+    }
+}
+
+function renderBookings() {
+    const bookingList = document.getElementById('bookingList');
+    if (!bookingList) return;
+    bookingList.replaceChildren();
+
+    if (!bookings.length) {
+        const emptyState = document.createElement('p');
+        emptyState.className = 'empty-state';
+        emptyState.textContent = 'You have no support requests yet.';
+        bookingList.appendChild(emptyState);
+        return;
+    }
+
+    [...bookings]
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .forEach((booking) => {
+            const row = document.createElement('article');
+            row.className = 'booking-row';
+
+            const details = document.createElement('div');
+            const title = document.createElement('strong');
+            title.textContent = booking.type;
+            const date = document.createElement('p');
+            date.textContent = `${booking.date} · ${booking.status}`;
+            const notes = document.createElement('p');
+            notes.textContent = booking.notes;
+            details.append(title, date, notes);
+
+            const cancelButton = document.createElement('button');
+            cancelButton.type = 'button';
+            cancelButton.className = 'task-button delete';
+            cancelButton.textContent = 'Cancel request';
+            cancelButton.dataset.bookingId = booking.id;
+            row.append(details, cancelButton);
+            bookingList.appendChild(row);
+        });
+}
+
+async function handleBookingAction(event) {
+    const button = event.target.closest('button[data-booking-id]');
+    if (!button || !window.confirm('Cancel this support request?')) return;
+
+    try {
+        await userCollection('bookings').doc(button.dataset.bookingId).delete();
+        showDashboardMessage('Support request cancelled.', 'success');
+    } catch (error) {
+        showDashboardMessage(describeFirebaseError(error, 'cancel your request'));
+    }
+}
+
+async function handleBookingSubmit(event) {
     event.preventDefault();
     const date = document.getElementById('bookingDate').value;
     const type = document.getElementById('bookingType').value;
     const notes = document.getElementById('bookingNotes').value.trim();
     const output = document.getElementById('bookingStatus');
 
-    if (!date || !notes) {
-        output.textContent = 'Please complete all fields before booking a session.';
+    if (!date || notes.length < 5 || notes.length > 500) {
+        output.textContent = 'Choose a date and enter notes between 5 and 500 characters.';
         output.className = 'booking-status error';
         return;
     }
 
-    const state = getState();
-    const booking = {
-        id: `booking-${Date.now()}`,
-        date,
-        type,
-        notes,
-        status: 'Confirmed'
-    };
+    const selectedDate = new Date(`${date}T00:00:00`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+        output.textContent = 'Choose today or a future date for your support request.';
+        output.className = 'booking-status error';
+        return;
+    }
 
-    state.bookings.push(booking);
-    saveState(state);
-
-    output.textContent = `Booking confirmed for ${type} on ${date}.`;
-    output.className = 'booking-status success';
-    event.target.reset();
+    try {
+        await userCollection('bookings').add({
+            date,
+            type,
+            notes,
+            status: 'Pending',
+            createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        });
+        output.textContent = `Your ${type} request was sent. The school will confirm the session.`;
+        output.className = 'booking-status success';
+        event.target.reset();
+    } catch (error) {
+        output.textContent = describeFirebaseError(error, 'send your support request');
+        output.className = 'booking-status error';
+    }
 }
 
 function setupGame() {
@@ -680,30 +703,20 @@ function setupGame() {
     });
 }
 
-function handleLogout() {
+async function handleLogout() {
     const auth = getAuthClient();
-
-    if (auth) {
-        auth.signOut()
-            .then(() => {
-                const state = getState();
-                state.session = null;
-                saveState(state);
-                window.location.href = '../index.html';
-            })
-            .catch(() => {
-                const state = getState();
-                state.session = null;
-                saveState(state);
-                window.location.href = '../index.html';
-            });
+    if (!auth) {
+        showDashboardMessage('The sign-out service is unavailable. Please reload and try again.');
         return;
     }
 
-    const state = getState();
-    state.session = null;
-    saveState(state);
-    window.location.href = '../index.html';
+    try {
+        redirectAfterSignOut = true;
+        await auth.signOut();
+    } catch (error) {
+        redirectAfterSignOut = false;
+        showDashboardMessage(describeFirebaseError(error, 'sign out'));
+    }
 }
 
 function attachDashboardEvents() {
@@ -712,6 +725,8 @@ function attachDashboardEvents() {
     const taskSort = document.getElementById('taskSort');
     const taskForm = document.getElementById('taskForm');
     const bookingForm = document.getElementById('bookingForm');
+    const taskList = document.getElementById('taskList');
+    const bookingList = document.getElementById('bookingList');
     const logoutButton = document.getElementById('logoutButton');
     const printSummary = document.getElementById('printSummary');
 
@@ -720,8 +735,45 @@ function attachDashboardEvents() {
     if (taskSort) taskSort.addEventListener('change', renderTasks);
     if (taskForm) taskForm.addEventListener('submit', handleTaskSubmit);
     if (bookingForm) bookingForm.addEventListener('submit', handleBookingSubmit);
+    if (taskList) {
+        taskList.addEventListener('click', handleTaskAction);
+        taskList.addEventListener('change', handleTaskToggle);
+    }
+    if (bookingList) bookingList.addEventListener('click', handleBookingAction);
     if (logoutButton) logoutButton.addEventListener('click', handleLogout);
     if (printSummary) printSummary.addEventListener('click', () => window.print());
+}
+
+function initializeDashboard() {
+    const auth = getAuthClient();
+    if (!auth || !window.firestoreDb) {
+        showDashboardMessage('The school data service is unavailable. Please try again later.');
+        return;
+    }
+
+    attachDashboardEvents();
+    setupGame();
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            if (stopTaskListener) stopTaskListener();
+            if (stopBookingListener) stopBookingListener();
+            stopTaskListener = null;
+            stopBookingListener = null;
+            tasks = [];
+            bookings = [];
+            currentUser = null;
+            window.location.replace(redirectAfterSignOut ? '/' : '/public/login.html');
+            return;
+        }
+
+        currentUser = user;
+        try {
+            await ensureUserProfile(user);
+            listenToUserData();
+        } catch (error) {
+            showDashboardMessage(describeFirebaseError(error, 'load your learner profile'));
+        }
+    });
 }
 
 function initPage() {
@@ -729,7 +781,6 @@ function initPage() {
     window.firestoreDb = getFirestoreClient();
 
     if (page === 'landing') {
-        renderLandingStats();
         return;
     }
 
@@ -746,10 +797,7 @@ function initPage() {
     }
 
     if (page === 'dashboard') {
-        ensureSession();
-        renderDashboard();
-        attachDashboardEvents();
-        setupGame();
+        initializeDashboard();
     }
 }
 

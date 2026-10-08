@@ -1,0 +1,124 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Profiles contain personally identifiable information and are private.
+    // users/{uid}: displayName, email, createdAt, updatedAt.
+    // users/{uid}/tasks/{taskId}: title, dueDate, priority, status,
+    // description, completed, createdAt, updatedAt.
+    // users/{uid}/bookings/{bookingId}: date, type, notes, status,
+    // createdAt, updatedAt.
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasUserProfile(userId) {
+      return exists(/databases/$(database)/documents/users/$(userId));
+    }
+
+    function isValidEmail(email) {
+      return email is string
+        && email.size() <= 254
+        && email.matches("^[^\\s@]+@[^\\s@]+\\.[A-Za-z]{2,63}$");
+    }
+
+    function isValidProfile(data) {
+      return data.keys().hasAll(['displayName', 'email', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['displayName', 'email', 'createdAt', 'updatedAt'])
+        && data.displayName is string
+        && data.displayName.size() >= 2
+        && data.displayName.size() <= 60
+        && data.email is string
+        && isValidEmail(data.email)
+        && request.auth.token.email is string
+        && data.email == request.auth.token.email
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidTask(data) {
+      return data.keys().hasAll([
+          'title', 'dueDate', 'priority', 'status', 'description',
+          'completed', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'title', 'dueDate', 'priority', 'status', 'description',
+          'completed', 'createdAt', 'updatedAt'
+        ])
+        && data.title is string
+        && data.title.size() >= 1
+        && data.title.size() <= 120
+        && data.dueDate is string
+        && data.dueDate.matches("^\\d{4}-\\d{2}-\\d{2}$")
+        && data.priority in ['Low', 'Medium', 'High']
+        && data.status in ['Pending', 'Completed']
+        && data.description is string
+        && data.description.size() <= 1000
+        && data.completed is bool
+        && data.completed == (data.status == 'Completed')
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidBooking(data) {
+      return data.keys().hasAll([
+          'date', 'type', 'notes', 'status', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'date', 'type', 'notes', 'status', 'createdAt', 'updatedAt'
+        ])
+        && data.date is string
+        && data.date.matches("^\\d{4}-\\d{2}-\\d{2}$")
+        && data.type in ['Career advice', 'Study support', 'Technical coaching']
+        && data.notes is string
+        && data.notes.size() >= 5
+        && data.notes.size() <= 500
+        && data.status == 'Pending'
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && isValidProfile(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isOwner(userId)
+        && isValidProfile(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+
+      match /tasks/{taskId} {
+        allow read: if isOwner(userId) && hasUserProfile(userId);
+        allow create: if isOwner(userId)
+          && hasUserProfile(userId)
+          && isValidTask(request.resource.data)
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+        allow update: if isOwner(userId)
+          && hasUserProfile(userId)
+          && isValidTask(request.resource.data)
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if isOwner(userId) && hasUserProfile(userId);
+      }
+
+      match /bookings/{bookingId} {
+        allow read: if isOwner(userId) && hasUserProfile(userId);
+        allow create: if isOwner(userId)
+          && hasUserProfile(userId)
+          && isValidBooking(request.resource.data)
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+        allow update: if false;
+        allow delete: if isOwner(userId) && hasUserProfile(userId);
+      }
+    }
+  }
+}

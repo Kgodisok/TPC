@@ -1,10 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { User, Task, Booking, calculateProgress } = require('../backend/models');
-const { validateDisplayName, validateEmail, validatePassword, registerUser, loginUser, validateSession } = require('../backend/auth');
-const { normalizeTask, createTask, updateTask, deleteTask } = require('../backend/database');
 const { firebaseApp, auth, firestore, database } = require('../backend/firebase');
-const { getLandingHighlights, formatStatValue } = require('../backend/landingPage');
 const { app } = require('../backend/app');
 
 test('a user owns tasks with the matching user ID', () => {
@@ -86,79 +83,6 @@ test('bookings track confirmation lifecycle state', () => {
     assert.equal(booking.status, 'Cancelled');
 });
 
-test('password validation enforces minimum strength requirements', () => {
-    assert.equal(validatePassword('short'), false);
-    assert.equal(validatePassword('ValidPass123'), false);
-    assert.equal(validatePassword('validpass123!'), false);
-    assert.equal(validatePassword('ValidPass123!'), true);
-    assert.equal(validatePassword(`ValidPass123!${'a'.repeat(115)}`), true);
-    assert.equal(validatePassword(`ValidPass123!${'a'.repeat(116)}`), false);
-});
-
-test('registration validators accept structured names and valid email addresses', () => {
-    assert.equal(validateDisplayName('Mary-Jane O\'Connor'), true);
-    assert.equal(validateDisplayName('李 小龍'), true);
-    assert.equal(validateDisplayName('---'), false);
-    assert.equal(validateDisplayName('Taylor2'), false);
-    assert.equal(validateEmail('taylor@example.com'), true);
-    assert.equal(validateEmail('taylor@'), false);
-    assert.equal(validateEmail('taylor..j@example.com'), false);
-    assert.equal(validateEmail('taylor@example'), false);
-});
-
-test('auth registration and login produce a valid session', () => {
-    const user = registerUser({
-        displayName: 'Taylor',
-        email: 'taylor@example.com',
-        password: 'ValidPass123!'
-    });
-
-    assert.equal(user.email, 'taylor@example.com');
-    const session = loginUser({ email: 'taylor@example.com', password: 'ValidPass123!' });
-    assert.ok(session && session.userId === user.id);
-    assert.equal(validateSession(session.sessionId), true);
-});
-
-test('auth registration rejects names that are not strings or contain numbers', () => {
-    assert.throws(() => registerUser({
-        displayName: 123,
-        email: 'numeric.type@example.com',
-        password: 'ValidPass123!'
-    }), /Display name is required/);
-    assert.throws(() => registerUser({
-        displayName: 'Taylor2',
-        email: 'numeric.name@example.com',
-        password: 'ValidPass123!'
-    }), /must not contain numbers/);
-});
-
-test('registration rejects malformed names, email addresses, and passwords', () => {
-    const validPassword = 'ValidPass123!';
-    assert.throws(() => registerUser({ displayName: '!!!', email: 'bad-name@example.com', password: validPassword }), /Display name must be/);
-    assert.throws(() => registerUser({ displayName: 'Taylor', email: 'taylor@invalid', password: validPassword }), /valid email address/);
-    assert.throws(() => registerUser({ displayName: 'Taylor', email: 'taylor@example.com', password: 'ValidPass123' }), /Password must be/);
-});
-
-test('database helpers normalize and update tasks', () => {
-    const task = normalizeTask({
-        title: 'Review report',
-        dueDate: '2026-10-10',
-        userId: 'user-1',
-        description: 'Prepare notes',
-        priority: 'high'
-    });
-
-    assert.equal(task.priority, 'High');
-    assert.equal(task.status, 'Pending');
-
-    const saved = createTask(task);
-    const updated = updateTask(saved.id, { status: 'Completed', completed: true });
-    assert.equal(updated.status, 'Completed');
-
-    const removed = deleteTask(saved.id);
-    assert.equal(removed, true);
-});
-
 test('firebase config exposes initialized services', () => {
     assert.ok(firebaseApp);
     assert.ok(auth);
@@ -168,47 +92,19 @@ test('firebase config exposes initialized services', () => {
     assert.equal(database, firestore);
 });
 
-test('landing page stats are shaped for display', () => {
-    const highlights = getLandingHighlights();
-    const value = formatStatValue(88, 'progress');
-
-    assert.ok(Array.isArray(highlights));
-    assert.equal(value, '88%');
-});
-
-test('server exposes auth and task API routes', async () => {
+test('server exposes health and rejects legacy in-memory APIs', async () => {
     const server = app.listen(0);
 
     try {
-        const authResponse = await fetch(`http://127.0.0.1:${server.address().port}/api/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                displayName: 'API Tester',
-                email: 'api.tester@example.com',
-                password: 'StrongPass123!'
-            })
-        });
+        const baseUrl = `http://127.0.0.1:${server.address().port}`;
+        const healthResponse = await fetch(`${baseUrl}/api/health`);
+        assert.equal(healthResponse.status, 200);
+        assert.deepEqual(await healthResponse.json(), { ok: true, app: 'SkillsTrack', status: 'healthy' });
 
-        assert.equal(authResponse.status, 201);
-        const authBody = await authResponse.json();
-        assert.equal(authBody.user.email, 'api.tester@example.com');
-
-        const taskResponse = await fetch(`http://127.0.0.1:${server.address().port}/api/tasks`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                title: 'Build API flow',
-                dueDate: '2026-10-20',
-                userId: 'api-user',
-                description: 'Complete the server route',
-                priority: 'High'
-            })
-        });
-
-        assert.equal(taskResponse.status, 201);
-        const taskBody = await taskResponse.json();
-        assert.equal(taskBody.task.title, 'Build API flow');
+        const authResponse = await fetch(`${baseUrl}/api/auth/register`, { method: 'POST' });
+        const taskResponse = await fetch(`${baseUrl}/api/tasks`);
+        assert.equal(authResponse.status, 404);
+        assert.equal(taskResponse.status, 404);
     } finally {
         await new Promise((resolve) => server.close(resolve));
     }
