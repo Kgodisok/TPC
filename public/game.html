@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SkillsTrack | Learning Challenge</title>
+    <link rel="stylesheet" href="../style.css?v=loader-1" />
+  </head>
+  <body data-page="game" aria-busy="true">
+    <div id="pageLoader" class="page-loader" role="status" aria-live="polite" aria-atomic="true">
+      <div class="page-loader-content">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <span id="pageLoaderMessage">Checking your school account...</span>
+      </div>
+    </div>
+    <header class="dashboard-header">
+      <div class="brand-block">
+        <span class="brand-mark">S</span>
+        <span>SkillsTrack</span>
+      </div>
+      <div class="game-page-actions">
+        <a class="secondary-button" href="/public/dashboard.html">Back to dashboard</a>
+        <button id="logoutButton" class="nav-button danger" type="button">Log out</button>
+      </div>
+    </header>
+
+    <main class="game-page-shell">
+      <section class="game-card game-page-panel">
+        <h1>Learning challenge</h1>
+        <p>Build confidence in planning tasks and using support effectively.</p>
+        <button id="startGame" class="primary-button" type="button">Start challenge</button>
+        <div id="gameArea" class="game-area" aria-live="polite" aria-label="Educational challenge area">
+          <p id="gamePrompt" class="game-prompt">Press Start challenge to begin.</p>
+          <div id="gameOptions" class="game-options"></div>
+          <p id="gameFeedback" class="game-feedback"></p>
+        </div>
+        <p class="game-score">Score: <strong id="gameScore">0</strong></p>
+      </section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
+    <script src="../js/frontend.js?v=loader-1"></script>
+  </body>
+</html>

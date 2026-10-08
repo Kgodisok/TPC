@@ -722,6 +722,34 @@ button:hover {
   margin-top: 12px;
 }
 
+.game-page-shell {
+  width: min(100% - 40px, 900px);
+  margin: 32px auto;
+}
+
+.game-page-panel {
+  padding: 28px;
+}
+
+.game-page-panel .game-area {
+  min-height: 180px;
+  height: auto;
+  padding: 20px;
+}
+
+.game-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media print {
+  .print-exclude {
+    display: none !important;
+  }
+}
+
 @media (max-width: 980px) {
   .dashboard-shell {
     grid-template-columns: 1fr;

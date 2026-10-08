@@ -223,18 +223,33 @@ async function handleLoginSubmit(event) {
     event.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
+    const selectedRole = document.getElementById('loginRole').value;
     const auth = getAuthClient();
+    const firestore = getFirestoreClient();
 
-    if (!auth) {
+    if (!auth || !firestore) {
         setAuthMessage('The school sign-in service is unavailable. Please try again later.', 'error');
         return;
     }
 
     try {
-        await withPageLoading('Signing in to your school account...', () => auth.signInWithEmailAndPassword(email, password));
+        const { user, role } = await withPageLoading('Signing in to your school account...', async () => {
+            const credential = await auth.signInWithEmailAndPassword(email, password);
+            const profile = await firestore.collection('users').doc(credential.user.uid).get();
+            return { user: credential.user, role: profile.data()?.role || 'learner' };
+        });
+
+        if (selectedRole !== role) {
+            await auth.signOut();
+            const expectedRole = role === 'assessor' ? 'Assessor' : 'Learner';
+            setAuthMessage(`This account is registered as a ${expectedRole.toLowerCase()}. Select ${expectedRole} to sign in.`, 'error');
+            return;
+        }
+
         setAuthMessage('Sign-in successful. Opening your learner dashboard...', 'success');
         setTimeout(() => redirectToDashboard(), 1200);
     } catch (error) {
+        if (auth.currentUser) await auth.signOut();
         setAuthMessage(describeFirebaseError(error, 'sign in'), 'error');
     }
 }
@@ -242,11 +257,17 @@ async function handleLoginSubmit(event) {
 async function handleRegisterSubmit(event) {
     event.preventDefault();
     const name = document.getElementById('registerName').value.trim().replace(/\s+/g, ' ');
+    const role = document.getElementById('registerRole').value;
     const email = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value;
 
-    if (!name || !email || !password) {
+    if (!name || !role || !email || !password) {
         setAuthMessage('Please complete every field before creating an account.', 'error');
+        return;
+    }
+
+    if (!['learner', 'assessor'].includes(role)) {
+        setAuthMessage('Select Learner or Assessor as your account type.', 'error');
         return;
     }
 
@@ -280,6 +301,7 @@ async function handleRegisterSubmit(event) {
             await firestore.collection('users').doc(user.uid).set({
                 displayName: name,
                 email: user.email,
+                role,
                 createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
                 updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
             });
@@ -307,11 +329,13 @@ async function ensureUserProfile(user) {
     const profile = profileSnapshot.data() || {};
     const displayName = user.displayName || profile.displayName || 'Learner';
     const email = user.email || profile.email || '';
+    const role = profile.role || 'learner';
 
     if (!profileSnapshot.exists) {
         await profileRef.set({
             displayName,
             email,
+            role,
             createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
             updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -321,6 +345,7 @@ async function ensureUserProfile(user) {
     const updates = {};
     if (profile.displayName !== displayName) updates.displayName = displayName;
     if (profile.email !== email) updates.email = email;
+    if (!profile.role) updates.role = role;
     if (Object.keys(updates).length) {
         updates.updatedAt = window.firebase.firestore.FieldValue.serverTimestamp();
         await profileRef.update(updates);
@@ -797,7 +822,6 @@ function initializeDashboard() {
     }
 
     attachDashboardEvents();
-    setupGame();
     setPageLoading(true, 'Checking your school account...');
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
@@ -826,6 +850,25 @@ function initializeDashboard() {
     });
 }
 
+function initializeGame() {
+    const auth = getAuthClient();
+    if (!auth) {
+        setPageLoading(false);
+        return;
+    }
+
+    setupGame();
+    document.getElementById('logoutButton')?.addEventListener('click', handleLogout);
+    auth.onAuthStateChanged((user) => {
+        if (!user) {
+            window.location.replace('/public/login.html');
+            return;
+        }
+
+        setPageLoading(false);
+    });
+}
+
 function initPage() {
     const page = document.body.dataset.page;
     window.firestoreDb = getFirestoreClient();
@@ -848,6 +891,11 @@ function initPage() {
 
     if (page === 'dashboard') {
         initializeDashboard();
+        return;
+    }
+
+    if (page === 'game') {
+        initializeGame();
     }
 }
 
